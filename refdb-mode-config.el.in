@@ -1,0 +1,50 @@
+;; refdb-mode and ris-mode configuration file example
+;; adapt the settings to your needs and include this
+;; file into your .emacs (or site-start.el) by inserting
+;; the following command:
+;;
+;; (load-file "<sysconfdir>/refdb-mode-config.el")
+;;
+;; Alternatively, copy the following lines directly
+;; into your .emacs
+
+
+;; load the editing mode for RIS files and associate .ris files
+;; with this mode
+(autoload 'ris-mode "ris" "Major mode for RIS bibliography files." t)
+(or (assoc "\\.ris$" auto-mode-alist)
+    (setq auto-mode-alist (cons '("\\.ris$" . ris-mode)
+				auto-mode-alist)))
+
+;; load refdb-mode
+(require 'refdb-mode)
+
+;; invoke refdb-mode automatically with these major modes. You may
+;; have to fiddle with the hook names if your OS/distribution uses
+;; different names for these modes
+(add-hook 'ris-mode-hook 'refdb-mode)
+(add-hook 'nxml-mode-hook 'refdb-mode)
+(add-hook 'bibtex-mode-hook 'refdb-mode)
+(add-hook 'psgml-mode-hook 'refdb-mode)
+(add-hook 'sgml-mode-hook 'refdb-mode)
+(add-hook 'refdb-output-mode-hook 'refdb-mode)
+
+;; this will highlight the currently selected region. It is highly
+;; recommended to use this feature with RIS datasets because some
+;; refdb-mode commands work either on the whole buffer or on the
+;; marked region. Seeing the marked region avoids surprises
+(transient-mark-mode t)
+
+;;; defaults ;;;
+
+;; set the default reference database. Replace "EXAMPLE" with the name
+;; of your database
+(setq refdb-database "EXAMPLE")
+
+;; paths to document viewers
+(setq refdb-gnumake-program "<mygnumake>")
+(setq refdb-pdf-view-program "<mypdfviewer>")
+(setq refdb-ps-view-program "<mypsviewer>")
+(setq refdb-rtf-view-program "<myrtfviewer>")
+(setq refdb-external-program-shell "<myshell>")
+(setq refdb-sysconfdir "<sysconfdir>/refdb")

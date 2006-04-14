@@ -1,0 +1,31 @@
+refdb-elisp README
+==================
+
+This package contains two extensions for the Emacs editor:
+
+refdb-mode.el adds an interface to RefDB, a reference database and
+bibliography tool, see http://refdb.sourceforge.net.
+
+ris.el adds editing support for RIS files.
+
+See the enclosed documentation in HTML or PDF format for further
+information.
+
+To install the package on Unix-like systems, run:
+
+tar -xzf refdb-elisp-1.0.tar.gz
+cd refdb-elisp-1.0
+./configure
+make
+make install
+
+Add the following to your ~/.emacs (check the path on your system):
+
+(load-file "/usr/local/etc/refdb-mode-config.el")
+
+To install the package on Windows, please see the additional
+instructions in the enclosed manual.
+
+(c) Markus Hoenicka <markus@mhoenicka.de> 2005
+
+$Id: README,v 1.3 2005/12/21 22:01:35 mhoenicka Exp $

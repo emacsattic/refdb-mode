@@ -1,0 +1,1490 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="http://localhost/docbook-css-0.4/driver.css" type="text/css"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd">
+<book>
+  <bookinfo>
+    <title>refdb-mode</title>
+    <author>
+      <firstname>Markus</firstname>
+      <surname>Hoenicka</surname>
+      <affiliation><address><email>markus@mhoenicka.de</email></address></affiliation>
+    </author>
+    <!-- the role attribute in the abstract element is required for the conversion to an info manual. This also explains the almost offending brevity of the abstract. -->
+    <abstract role="texinfo-node">
+      <para>An Emacs minor mode for the RefDB reference manager and bibliography tool.</para>
+    </abstract>
+  </bookinfo>
+  <preface>
+    <title>Preface</title>
+    <para>refdb-mode turns GNU Emacs into a frontend for <ulink url="http://refdb.sourceforge.net">RefDB</ulink>, a reference manager and bibliography tool for markup languages. refdb-mode is a minor mode which works well alongside the major modes PSGML (SGML editing), nxml-mode (XML editing), and ris-mode (RIS editing). It offers a full set of menu commands for reference and notes management, allowing you to conveniently use Emacs to create or update references and notes. Moreover, it allows you to create DocBook and TEI documents for use with RefDB. You can transform the documents and view the results with a mouseclick. It integrates seamlessly into your authoring process, allowing you to search for references and yank them directly in place, without ever leaving Emacs. Finally, there is also a full set of administrative commands to control all aspects of RefDB configuration and administration.</para>
+    <para>This manual gives a brief overview of how to use refdb-mode, followed by a more thorough description of all available commands.</para>
+    <para>Please visit the <ulink url="http://refdb.sourceforge.net">RefDB web page</ulink> for further information about RefDB and for the addresses of mailing lists where problems with refdb-mode can be discussed.</para>
+  </preface>
+  <chapter id="chapter-installation">
+    <title>Installation</title>
+    <para>Installing refdb-mode is not much different from installing other Emacs extensions. It is assumed that you have a basic understanding of the Emacs configuration and directory layout. For further information about this topic, please consult the <ulink url="http://www.gnu.org/software/emacs/manual/">GNU Emacs manual</ulink>.</para>
+    <sect1>
+      <title>Prerequisites</title>
+      <para>First of all you need GNU Emacs itself. Emacs is available prepackaged for most contemporary operating systems, or it can be obtained as a source tarball from the <ulink url="http://directory.fsf.org/emacs.html">GNU site</ulink>. You also need a working installation of <ulink url="http://refdb.sourceforge.net">RefDB</ulink>. You need at least the clients on the same computer that will run refdb-mode. If you access the application server <command>refdbd</command> on a remote server, you can build the required tools on your computer by configuring RefDB with the <option>--disable-server</option> switch.</para>
+      <para>The RefDB clients must be fully operational on your computer. If you can't run the RefDB clients manually, refdb-mode won't be able to do it either. This means in particular that your client configuration files (<filename>~/.refdbarc</filename>, <filename>~/.refdbcrc</filename>, and <filename>~/.refdbibrc</filename>) must be set up properly, including a valid username/password combo. refdb-mode cannot ask for the password interactively (aside from the fact that this would be annoying), so this must be set in your configuration file. Please refer to the <ulink url="http://refdb.sourceforge.net/doc.html#manual">RefDB manual</ulink> for further instructions</para>
+      <para>The bibliography data conversion relies on the external <ulink url="http://www.scripps.edu/~cdputnam/software/bibutils/bibutils.html">bibutils tools</ulink>.</para>
+    </sect1>
+    <sect1>
+      <title>Installing the Emacs Lisp files</title>
+      <para>The most convenient way to install the files on your system is to use the autotools-based installation. To this end, run the following commands in the directory which contains the refdb-mode sources:</para>
+      <screen>
+	<prompt>root# </prompt><userinput>./configure</userinput>
+      </screen>
+      <para>You should check the output of this command carefully. You'll get a warning if the required RefDB tools are not found, and if <command>sudo</command> is missing. You'll be able to proceed with the installation anyway, but in the first case you won't be able to do anything, in the second case you won't be able to use a part of the administrative interface. The script also tries to find applications that you can use as external viewers for PDF, Postscript, and RTF files. If the script can't find an application which you know is installed, you may have to include this app into your path before running <command>configure</command>, e.g. like this:</para>
+      <screen>
+	<prompt>root# </prompt><userinput>export PATH=$PATH:/usr/local/OpenOffice.org1.1.4/program</userinput>
+	<prompt>root# </prompt><userinput>./configure</userinput>
+      </screen>
+      <para>The applications are used as system-wide defaults for the document viewers. However, each user can <link linkend="sect-customizing-refdb-mode">individually customize</link> refdb-mode after the installation if she wants to use different applications for this purpose.</para>
+      <para>Once this is done, you can byte-compile the Emacs Lisp files and install all required files:</para>
+      <screen>
+	<prompt>root# </prompt><userinput>make</userinput>
+	<prompt>root# </prompt><userinput>make install</userinput>
+      </screen>
+      <para>The Lisp files proper will be installed into an appropriate <filename class="directory">site-lisp</filename> directory. The configuration file <filename>refdb-mode-config.el</filename> will be installed in your system configuration directory, which is either <filename class="directory">/etc</filename> or <filename class="directory">/usr/local/etc</filename> on most systems. The HTML and PDF versions of the documentation will be installed in your documentation directory, usually <filename class="directory">/usr/share/doc/refdb-elisp</filename> or <filename class="directory">/usr/local/share/doc/refdb-elisp</filename>. An info version of the manual is also installed. You can view it from the command line using <command><userinput>info refdb-mode</userinput></command> or from within Emacs with the <menuchoice><guimenu>RefDB</guimenu><guimenuitem>Show Manual</guimenuitem></menuchoice> menu command.</para>
+      <para>If you run more than one Emacs version, or if you want to test-drive refdb-mode without installing it system-wide, you can pass an alternative site-lisp directory to <command>configure</command> with the <option>--with-lispdir</option> option. Make sure that this directory is in your load path, e.g. by adding the following line to your <filename>.emacs</filename>:</para>
+      <programlisting>
+      (add-to-list 'load-path "c:/path/to/elisp/")
+      </programlisting>
+    </sect1>
+    <sect1 id="sect-setting-up">
+      <title>Setting up refdb-mode</title>
+      <para>In order to use refdb-mode and the associated ris-mode you'll have to load these modes either from your <filename>.emacs</filename> or from a global startup file (<filename>default.el</filename> or <filename>site-start.el</filename>). To this end, load the configuration file from one of the startup files like this:</para>
+      <programlisting>
+(load-file "/usr/local/etc/refdb-mode-config.el")
+      </programlisting>
+      <para>Alternatively, you can copy the code in that file directly into one of your startup files. Please see the comments in the example configuration file for further instructions.</para>
+    <note>
+      <para>Some package management systems use a <filename class="directory">site-start.d</filename> directory which holds this kind of Emacs startup files. You can put an appropriately named symlink to <filename>refdb-mode-config.el</filename> into this directory.</para>
+    </note>
+    </sect1>
+    <sect1 id="sect-customizing-refdb-mode">
+      <title>Customizing refdb-mode</title>
+      <para>refdb-mode can be configured entirely through the customization interface of Emacs. Either run the menu command <menuchoice><guimenu>RefDB</guimenu><guisubmenu>Administration</guisubmenu><guimenuitem>Customize RefDB mode</guimenuitem></menuchoice> or type <keycombo><keycap>M</keycap><keycap>x</keycap></keycombo><userinput>customize</userinput> and browse to the RefDB section in the Applications section.</para>
+      <para>If you used the autotools-based package to install refdb-mode, the file <filename>/usr/local/etc/refdb-mode-config.el</filename> contains a few system-wide customizations which adapt refdb-mode to your local system. <command>./configure</command> checks for file viewers available on your system, and it also sets the directory containing the global RefDB configuration files. This file is the best place for system-wide refdb-mode customizations.</para>
+    </sect1>
+    <sect1 id="sect-invoking">
+      <title>Invoking refdb-mode</title>
+      <para>If you use the configuration file mentioned <link linkend="sect-setting-up">above</link>, refdb-mode will be automatically invoked whenever you load a file type associated with the mode, e.g. an XML file or a RIS file. To load the mode manually, use either the menu command <menuchoice><guimenu>Tools</guimenu><guimenuitem>RefDB Mode</guimenuitem></menuchoice> or run <keycombo><keycap>M</keycap><keycap>x</keycap></keycombo><userinput>refdb-mode</userinput>.</para>
+    </sect1>
+    <sect1>
+      <title>Using refdb-mode with NTEmacs</title>
+      <para>Windows is an extra challenge for refdb-mode, as we have to call Cygwin programs (which use Unix-style paths) from a Win32 application (which uses Win32-style paths) by running a Cygwin shell (which needs a different environment than the one it inherits from NTEmacs) through Lisp commands, leaving enough room for things to go wrong. It boils down to getting your <filename>.emacs</filename> right, and we'll show here step by step what it takes to see the light. You'll notice that the setup uses UTF-8 quite heavily, assuming that you've set up your RefDB databases accordingly. I've settled for this encoding as it gave me the simplest consistent setup possible. You may well experiment with other character encodings, but I hardly see any benefit in doing so.</para>
+      <note>
+	<para>Some of the administrative functions currently do not work under NTEmacs. Affected are all functions which run <command>sudo</command> for authentication or which start an xterm to obtain database passwords.</para>
+      </note>
+      <note>
+	<para>Path names need a little extra care on Windows. Save yourself a great deal of pain by adding all Win32 executables that you want to call (mainly viewers for RTF, PDF, and Postscript files) to your Windows PATH. In your <filename>/usr/local/etc/refdb-mode-config.el</filename> file, use the command names instead of the full paths of the viewing programs. Viewing HTML files is handled by browse-url which should be set up to use an external browser like Firefox. The Emacs w3 browser does not seem to grok the paths assembled by refdb-mode.</para>
+	</note>
+       <programlisting>
+;; use Unix-style line endings
+(setq-default buffer-file-coding-system 'undecided-unix)
+
+;; xml files as well as files with "utf8" somewhere
+;; in the path are opened as Unicode
+(setq file-coding-system-alist
+      (append (list
+	       (cons "\\.xml$" 'utf-8)
+	       (cons "utf8" 'utf-8))
+	      file-coding-system-alist))
+      </programlisting>
+      <para>First we ask NTEmacs to use Unix-style line endings. The second expression makes sure that all XML files as well as all files with the string "utf8" in their name (e.g. <filename>refdata-utf8.ris</filename>) are loaded as Unicode files using the UTF-8 character encoding.</para>
+      <programlisting>
+;; use bash as the default shell
+(setq exec-path (cons "C:/Programme/cygwin/bin" exec-path))
+(setq shell-file-name "bash")
+(setenv "SHELL" shell-file-name)
+(setenv "PATH" (concat (getenv "PATH") ";C:\\Programme\\cygwin\\bin" ";C:\\Programme\\cygwin\\usr\\local\\bin"))
+(setq explicit-shell-file-name shell-file-name)
+(setq explicit-shell-args '("--login" "-i"))
+(setq shell-command-switch "-ic")
+(setq w32-quote-process-args t)
+(defun bash ()
+  (interactive)
+  (let ((binary-process-input t)
+        (binary-process-output nil))
+    (shell)))
+
+(setq process-coding-system-alist (cons '("bash" . (utf-8-dos . utf-8-unix))
+                    process-coding-system-alist))
+      </programlisting>
+      <para>This block of commands uses the Cygwin version of <command>bash</command> as the default shell. It also makes sure that a few additional directories are added to the path. Finally it tells NTEmacs that the data returned by the shell use the UTF-8 encoding as well. The paths shown here need to be adapted to your local installation.</para>
+      <note>
+	<para>If you want to process SGML files, you'll have to set <envar>SGML_CATALOG_FILES</envar> once in your <filename>.bashrc</filename> using Unix-style paths (bash, when called from NTEmacs, doesn't seem to evaluate <filename>/etc/profile</filename>) to make the catalogs available to OpenJade et al., and once in your system (the usual clicking odyssey in the control panel) using the Win32 paths. PSGML will use the latter when running under NTEmacs.</para>
+      </note>
+      <programlisting>
+;; refdb-mode and ris mode
+(load-file "c:/Programme/emacsen/site-lisp/refdb-mode-config.el")
+(setq refdb-default-ris-encoding 'utf-8-unix)
+      </programlisting>
+      <para>Now we load refdb-mode and ris-mode through the config file. Again, use the path of your local system here. The second command makes sure we use UTF-8 again to display results in RIS format.</para>
+      <programlisting>
+;; nxml mode
+(load "c:/Programme/emacsen/site-lisp/nxml-mode-20041004/rng-auto.el")
+(setq auto-mode-alist
+      (cons '("\\.\\(xml\\|xsl\\|rng\\|xhtml\\)\\'" . nxml-mode)
+	    auto-mode-alist))
+      </programlisting>
+      <para>Finally, we also load nxml-mode to edit XML files. The setup of PSGML to edit SGML-files has been described <ulink url="http://www.mhoenicka.de/software/sgml/sgmlnt.html">elsewhere</ulink> (slightly outdated, though).</para>
+      <para>The final step to make nxml-mode work properly is to make the RefDB RelaxNG schemas known to the system. To this end, create or edit the file <filename>schemas.xml</filename> in your home directory. The contents for the RefDB schemas looks like this:</para>
+      <programlisting>
+&lt;locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0"&gt;
+  &lt;documentElement prefix="" localName="ris" typeId="RISX"/&gt;
+  &lt;documentElement prefix="" localName="STYLESET" typeId="CiteStyleX"/&gt;
+  &lt;documentElement prefix="" localName="xnoteset" typeId="XNote"/&gt;
+
+  &lt;typeId id="RISX" uri="/Programme/cygwin/usr/local/share/refdb/dtd/risx.rnc"/&gt;
+  &lt;typeId id="CiteStyleX" uri="/Programme/cygwin/usr/local/share/refdb/dtd/citestylex.rnc"/&gt;
+  &lt;typeId id="XNote" uri="/Programme/cygwin/usr/local/share/refdb/dtd/xnote.rnc"/&gt;
+&lt;/locatingRules&gt;
+      </programlisting>
+      <para>You may have to run the command <keycombo><keycap>M</keycap><keycap>x</keycap></keycombo>customize-variable<keycap>RET</keycap>rng-schema-locating-files<keycap>RET</keycap> and add the path of your <filename>schemas.xml</filename> to the existing list of schema files. <emphasis>Do not</emphasis> use a drive letter but start the path with a slash, like in the file itself.</para>
+    </sect1>
+  </chapter>
+  <chapter id="chapter-concepts">
+    <title>Concepts</title>
+    <para>We'll start by introducing a few concepts which should make it easier to understand how refdb-mode works. In general it is useful to have a basic understanding of RefDB and of its command-line clients. See the <ulink url="http://refdb.sourceforge.net/doc.html#manual">RefDB manual</ulink> for further information.</para>
+    <sect1>
+      <title>Default database</title>
+      <para>RefDB needs to know which reference database you want to work with (there might be more than one on your system). To this end, refdb-mode remembers the name of the database once it is set and uses it for all subsequent commands that access a reference database. You have two options to permanently set the default database:</para>
+      <itemizedlist>
+	<listitem>
+	  <para>Add the following command to your <filename>~/.emacs</filename>: <command>(setq refdb-database "EXAMPLE")</command>. Replace "EXAMPLE" with the name of your reference database.</para>
+	  <para>Use the <link linkend="sect-customizing-refdb-mode">Customization buffer</link> to set the RefDB database.</para>
+	</listitem>
+      </itemizedlist>
+      <para>If you want to switch databases during a session, use the <link linkend="command-select-database"><menuchoice><guimenu>RefDB</guimenu><guimenuitem>Select Database</guimenuitem></menuchoice></link> menu command. This command will pop up a list of available databases that you can choose from.</para>
+    </sect1>
+    <sect1>
+      <title>Data formats</title>
+      <para>RefDB accepts and creates a variety of data formats. Emacs has editing modes for most of these. We'll briefly discuss what to do with these types.</para>
+      <sect2 id="sect-ris">
+	<title>RIS</title>
+	<para>The RIS format is sort of an interchange format for bibliographic data that most commercial bibliography software can read and create. RefDB accepts this format as a native input format. It is a tagged format, i.e. each logical line starts with a tag which describes the contents of that line. refdb-mode ships with an additional mode called ris-mode (<filename>ris.el</filename>) which adds syntax highlighting as well as some basic editing support for this data format to Emacs. The RIS format is fairly compact and easy to understand. This format is a good choice as the default output format, as it is both convenient to read and easy to update the database with changes.</para>
+      </sect2>
+      <sect2>
+	<title>risx</title>
+	<para>This is an XML application which describes the RIS standard (with minor extensions) using a syntax familiar to anyone who writes XML or SGML documents. It is more verbose than the <link linkend="sect-ris">RIS</link> format, but it can also be used to update the database directly if you want to commit changes. risx has an edge over RIS in terms of validation. If you have nxml-mode associated with XML files, refdb-mode will use this mode to display query results in RISX format as well as source files containing bibliographic data. nxml-mode contains a validating parser, so you have an immediate feedback whether or not your changes to the data are valid. refdb-mode will refuse to add or update XML data if nxml-mode indicates they are not valid. This format is a good choice if you are familiar with XML data anyway and if you are not put off by its verbosity.</para>
+      </sect2>
+      <sect2>
+	<title>xnote</title>
+	<para>This is another XML application which describes extended notes. This is the only input format available for extended notes. These notes are not part of your bibliographic data, but they can be attached to a variety of objects in your reference database, like (obviously) bibliographic records, but also author names, periodicals, and keywords. Use this format to add and update extended notes. When using nxml-mode for XML data, you'll also get validation for free.</para>
+      </sect2>
+      <sect2>
+	<title>citestylex</title>
+	<para>This is yet another XML application which describes bibliography and citation styles. This is the only available import and export format for style data. When using nxml-mode for XML data, you'll also enjoy the benefits of real-time validation.</para>
+      </sect2>
+      <sect2>
+	<title>Other formats</title>
+	<para>All other formats can only be used to export or view reference and notes data. They are of limited use in the interactive use of refdb-mode, but come in handy if you need to export data for other purposes.</para>
+      </sect2>
+      <sect2>
+	<title>Selecting output formats</title>
+	<para>refdb-mode uses a few menu commands to select and customize the output format of reference and note queries (remember that there is no choice for extended notes and citation styles).</para>
+	<para>The <menuchoice><guimenu>RefDB</guimenu><guisubmenu>Customize Data Output</guisubmenu><guimenuitem>Select Reference Output Type</guimenuitem></menuchoice> menu command pops up a list of available output formats. After selecting one of the available formats, all future calls to a command which returns reference data will use this output format.</para>
+	<para>The <menuchoice><guimenu>RefDB</guimenu><guisubmenu>Customize Data Output</guisubmenu><guimenuitem>Select Notes Output Type</guimenuitem></menuchoice> menu command works exactly the same and selects the output format of extended notes.</para>
+	<para>The <menuchoice><guimenu>RefDB</guimenu><guisubmenu>Customize Data Output</guisubmenu><guimenuitem>Select Output Format</guimenuitem></menuchoice> menu command selects how much information is displayed in the reference data. RIS and risx always return all available data, as these formats are meant to add and update datasets in the database. The remaining formats show only the core bibliographic data. By default, they do not show information like the reprint status or the abstract. If you select <menuchoice><guimenuitem>All fields</guimenuitem></menuchoice> here, these formats will also display all information. If you select <menuchoice><guimenuitem>More (additional) fields</guimenuitem></menuchoice>, a customizable subset of the additional fields will be displayed. Use the <menuchoice><guimenu>RefDB</guimenu><guisubmenu>Customize Data Output</guisubmenu><guimenuitem>Select Additional Data Fields</guimenuitem></menuchoice> menu command to select the additional fields that you would like to be displayed. The <menuchoice><guimenuitem>IDs only</guimenuitem></menuchoice> can be used in conjunction with RIS output. Some commands of the command-line clients use this kind of minimized RIS data as input (this is currently not supported by refdb-mode).</para>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Reference data and extended note identification</title>
+      <para>Each reference and note in a database carries two unique identifiers:</para>
+      <variablelist>
+	<varlistentry>
+	  <term>ID</term>
+	  <listitem>
+	    <para>A numeric identifier which is generated by RefDB automatically when adding a dataset. There is no way to alter the ID. An example of an ID is"513".</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>Citation key</term>
+	  <listitem>
+	    <para>An alphanumeric identifier which is generated by RefDB when adding a dataset unless the dataset specifies a citation key. If RefDB has to generate the citation key for a reference, it will use the last name of the first author and the publication year, followed by a character sequence to make the result database-unique if required. The result is something like "Miller1999b". Citation keys for extended notes are generated in a similar fashion from the note author's name and the timestamp.</para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </sect1>
+    <sect1>
+      <title>Screen layout</title>
+      <para>Whenever you run refdb-mode commands which create output (as opposed to status messages which are displayed in the echo area), two windows open and display the results. The <varname>*refdb-output*</varname> buffer displays the command results proper, e.g. the bibliographic data which the commands in the <guisubmenu>Get References</guisubmenu> submenu create. refdb-mode tries to infer the proper major mode for the type of data, e.g. it will load ris-mode for RIS data and nxml-mode for any of the XML formats. The modeline shows the major mode used as well as the character encoding. The <varname>*refdb-messages*</varname> buffer keeps a log of the result summaries, e.g. the number of retrieved references.</para>
+      <para>Commands that require additional data will prompt for these in the minibuffer. You can use the minibuffer history to recover any previously used input. In most cases you can also use minibuffer completion (<keycap>tab</keycap> or <keycap>space</keycap> key) to fill in the remainder of an argument or to choose between alternatives.</para>
+    </sect1>
+    <sect1>
+      <title>refdb-mode is schizophrenic</title>
+      <para>refdb-mode uses two different accounts for the regular reference management commands on the one hand and for the administrative commands on the other hand. The latter are all in the <guisubmenu>Administration</guisubmenu> submenu. refdb-mode will automatically use the appropriate username and password if your client configuration files for <command>refdbc</command> (regular commands) and <command>refdba</command> (administrative commands) are set up properly.</para>
+      <para>Some administrative commands require root permissions. To this end, refdb-mode will run <command>sudo</command>. You or your site administrator will have to set up an appropriate <filename>sudoers</filename> file which will allow you to run commands as root, see sudo(8). refdb-mode will ask you for your sudoers password whenever it is required.</para>
+    </sect1>
+    <sect1>
+      <title>Working with reference data</title>
+      <para>Getting bibliographic references into and out of the database is a key feature of any bibliographic software. Sure enough refdb-mode has commands to add, update, and retrieve bibliographic data. In addition there are a few commands to convert bibliographic data from and to formats that RefDB does not support natively.</para>
+      <sect2 id="sect-adding-updating-references">
+	<title>Adding and updating references</title>
+	<para>To add data from an external source, either load the source file or yank the data into an appropriate empty buffer. If set up correctly, Emacs will use an appropriate major mode to display and edit the data. You can now go ahead and make any changes to the data. refdb-mode commands work on the buffer data, not on the source file. That is, you can edit to your heart's content without having to change the original source files.</para>
+      <para>When you are ready to commit the data, you'll have to watch out for the following:</para>
+      <itemizedlist>
+	<listitem>
+	  <para>refdb-mode will accept risx data only if nxml-mode declares the buffer valid (if you use a different mode to edit XML data, no check is available). You cannot add a subset of a buffer as RefDB requires you to send a complete, valid XML document.</para>
+	</listitem>
+	<listitem>
+	  <para>When working with RIS data, the commands to add or update references either work on a region or on the whole buffer if no region is selected. It is highly recommended to use transient-mark-mode with RIS data. If there is a region, it will be highlighted. To deactivate the mark and use the whole buffer instead, press <keycombo><keycap>C</keycap><keycap>g</keycap></keycombo>.</para>
+	</listitem>
+      </itemizedlist>
+      <para>To add the contents of the buffer or of the selected region to the database, use the <xref linkend="command-add-references"/> menu command. If you have retrieved the data from the database and want to commit your changes, use the <xref linkend="command-update-references"/> menu command instead.</para>
+      </sect2>
+      <sect2>
+	<title>Retrieving references</title>
+	<para>refdb-mode provides a convenient interface to run simple queries. Simple queries are queries which select references by a single field only, e.g. by author or by keyword. In addition there is a command to type in complex queries which uses the same syntax as the <command>getref</command> command of RefDB.</para>
+	<para>You have to tell refdb-mode where to search for these values. The command names indicate the field to search in. Simple queries come in three flavors:</para>
+	<itemizedlist>
+	  <listitem>
+	    <para>You are prompted to type in the value to search for, which has to match exactly. These commands are in the <xref linkend="submenu-get-references"/> submenu. Minibuffer completion and history are available to enter or reuse query strings.</para>
+	  </listitem>
+	  <listitem>
+	    <para>You are prompted to type in the value, which is a regular expression. These commands are also in the <xref linkend="submenu-get-references"/> submenu, and completion as well as history are also available. Please be aware that you may have to escape some characters in order to generate valid query strings. The type of regular expression (Unix vs. SQL) depends on the database engine used by RefDB.</para>
+	  </listitem>
+	  <listitem>
+	    <para>You select a region with the keyboard or with your mouse and use that as a regular expression. These commands are in the <xref linkend="submenu-get-references-on-region"/> submenu. This type of query comes in handy to look up words or phrases that you write in your document and see whether there are any references that contain these strings as keywords or in the title. It is also useful to display references that you have cited somewhere in your text: just mark the citation key and run a query on this region.</para>
+	  </listitem>
+	</itemizedlist>
+	<para>If your query is successful, the *refdb-output* buffer will contain the matching references in the format that you've selected. The *refdb-messages* buffer will indicate the number of retrieved references. If the data are either in RIS or in risx format, you can edit the data right away and <link linkend="sect-adding-updating-references">update</link> the database.</para>
+      </sect2>
+      <sect2>
+	<title>Converting reference data</title>
+	<para>Reference data in several formats that RefDB does not understand natively can be converted to RIS. Load the data into a buffer and run the appropriate "From" command in the <xref linkend="submenu-convert-references"/> submenu.</para>
+	<para>Going the other way round, RIS data can be exported to formats that RefDB cannot readily create. Use the appropriate "To" command in the <xref linkend="submenu-convert-references"/> submenu to export the data to EndNote or to MODS.</para>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Working with extended notes</title>
+      <para>Extended notes are XML documents that link a note text to one or more objects (references, keywords, author names, periodicals) in your reference database. You work with these data basically in the same way as with risx reference data. nxml-mode povides real-time validation, and the <xref linkend="command-add-notes"/> and <xref linkend="command-update-notes"/> commands also refuse to run if the buffer is not valid.</para>
+      <para>Retrieving notes also works in a similar fashion as retrieving references, but with an additional quirk: as notes are linked to database objects, you can use the link target as a criterion in notes queries. Wherever appropriate, minibuffer completion and history are also available. The relevant functions are located in the <xref linkend="submenu-get-notes"/> and <xref linkend="submenu-get-notes-on-region"/> submenus.</para>
+    </sect1>
+    <sect1>
+      <title>Working with markup documents</title>
+      <para>RefDB implements a convenient way to edit and publish markup documents using bibliographies. The transformation and bibliography creation is controlled by a Makefile in the same directory as the source file. This is fully supported by refdb-mode.</para>
+      <para>If you want to create a document for use with RefDB from scratch, use the <xref linkend="command-create-document"/> command. You'll be prompted for a few bits of information. Then RefDB will create a Makefile and appropriate skeleton documents in the desired format. The latter will be loaded into a buffer so you may edit it right away.</para>
+      <note>
+	<para>By default, the document using the full citation format will be loaded as refdb-mode can handle the link normalization on its own. However, if you have a reason to do so you can configure refdb-mode to load the document using the short citation format.</para>
+      </note>
+      <para>To add citations to your document, use the appropriate <xref linkend="submenu-get-references"/> or <xref linkend="submenu-get-references-on-region"/> commands to retrieve the references you want to cite. Then either move point into the reference that you want to cite, or set mark and point to select several references. Use the appropriate command of the <xref linkend="submenu-cite-references"/> submenu to add the citation(s) to the kill ring. Now switch back to your source document and use <keycombo><keycap>C</keycap><keycap>y</keycap></keycombo> to yank the citation in place. The default citation format works with XML documents. If you're editing SGML documents, use the <menuchoice><guimenu>RefDB</guimenu><guisubmenu>Customize Data Output</guisubmenu><guimenuitem>Select Citation Output Format</guimenuitem></menuchoice> menu command to switch to SGML.</para>
+      <para>It is also easy to do a reverse lookup, i.e. display the references in a citation. To this end, place point somewhere into a citation and run the <menuchoice><guimenu>RefDB</guimenu><guimenuitem>Get References from Citation</guimenuitem></menuchoice> menu command.</para>
+    </sect1>
+  </chapter>
+  <chapter id="chapter-commands">
+    <title>refdb-mode commands</title>
+    <para>Essentially all commands are accessible through the menu. The <guimenu>RefDB</guimenu> menu is subdivided into several sections. We'll discuss the sections in the order of appearance. Each description contains the synopsis of the refdb-mode command, i.e. what you'll have to type in after pressing <keycombo><keycap>M</keycap><keycap>x</keycap></keycombo>if you want to run the command from the minibuffer.</para>
+    <sect1>
+      <title>Managing references</title>
+      <para>This section contains all commands that you need to manage references.</para>
+      <sect2 id="command-add-references" xreflabel="Add References">
+	<title>Add References</title>
+	<indexterm><primary sortas="addref-on-region">refdb-addref-on-region</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-addref-on-region</function></funcdef>
+	    <void/>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>Adds the references in the current buffer to the currently selected database. If the buffer is a risx buffer, the whole contents of the buffer will be added to the database. If nxml-mode considers the buffer to be invalid, an error message is returned and no data are sent to the database</para>
+	<para>If the buffer is a RIS buffer and no region is selected, the whole buffer will be sent to the database. If a region is selected, only the references contained in the region will be sent to the database.</para>
+      </sect2>
+      <sect2 id="command-update-references" xreflabel="Update References">
+	<title>Update References</title>
+	<indexterm><primary sortas="updateref-on-region">refdb-updateref-on-region</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-updateref-on-region</function></funcdef>
+	    <void/>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>Updates the references in the current buffer, i.e. existing references in the database are updated with the data of the current buffer. Works essentially like the <xref linkend="command-add-references"/> command.</para>
+      </sect2>
+      <sect2 id="command-delete-references" xreflabel="Delete References">
+	<title>Delete References</title>
+	<indexterm><primary sortas="deleteref">refdb-deleteref</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-deleteref</function></funcdef>
+	    <paramdef><parameter>idlist</parameter></paramdef>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>Asks interactively for a list of IDs to delete from the current database. The references will be permanently removed from the database.</para>
+	<note>
+	  <para>It is not possible to delete references that other users have added to their personal interest list. Use <xref linkend="command-dump-references"/> instead in this case</para>
+	</note>
+      </sect2>
+      <sect2 id="submenu-get-references" xreflabel="Get References">
+	<title>Get References submenu</title>
+	<para>This submenu provides a variety of commands to run simple and complex queries. The commands interactively ask for the value to search for. Wherever appropriate there is a choice between exact matches and regular expressions.</para>
+	<sect3 id="command-get-references-author" xreflabel="Author">
+	  <title>Author</title>
+	  <indexterm><primary sortas="getref-by-author">refdb-getref-by-author</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-author</function></funcdef>
+	      <paramdef><parameter>author</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of an author. All references that contain this person as an author, as an editor, or as a series editor will be displayed. refdb-mode attempts an exact match of the value that you type in. Tab completion is available.</para>
+	</sect3>
+	<sect3 id="command-get-references-author-regexp" xreflabel="Author (regexp)">
+	  <title>Author (regexp)</title>
+	  <indexterm><primary sortas="getref-by-author-regexp">refdb-getref-by-author-regexp</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-author-regexp</function></funcdef>
+	      <paramdef><parameter>author</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of an author as a regular expression. All references that contain this person as an author, as an editor, or as a series editor will be displayed. refdb-mode attempts a regular expression match of the value that you type in. Tab completion is available.</para>
+	</sect3>
+	<sect3 id="command-get-references-title" xreflabel="Title">
+	  <title>Title</title>
+	  <indexterm><primary sortas="addref-by-title">refdb-addref-by-title</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-title</function></funcdef>
+	      <paramdef><parameter>title</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the title of a reference. All references that use this string as a title, a book title, or a series title will be displayed. refdb-mode attempts an exact match of the value that you type in.</para>
+	</sect3>
+	<sect3 id="command-get-references-title-regexp" xreflabel="Title (regexp)">
+	  <title>Title (regexp)</title>
+	  <indexterm><primary sortas="getref-by-title-regexp">refdb-getref-by-title-regexp</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-title-regexp</function></funcdef>
+	      <paramdef><parameter>title</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a title as a regular expression. All references that contain a matching string as a title, a book title, or a series title will be displayed. refdb-mode attempts a regular expression match of the value that you type in.</para>
+	</sect3>
+	<sect3 id="command-get-references-keyword" xreflabel="Keyword">
+	  <title>Keyword</title>
+	  <indexterm><primary sortas="getref-by-keyword">refdb-getref-by-keyword</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-keyword</function></funcdef>
+	      <paramdef><parameter>keyword</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a keyword. All references that contain this keyword will be displayed. refdb-mode attempts an exact match of the value that you type in. Tab completion is available.</para>
+	</sect3>
+	<sect3 id="command-get-references-keyword-regexp" xreflabel="Keyword (regexp)">
+	  <title>Keyword (regexp)</title>
+	  <indexterm><primary sortas="getref-by-keyword-regexp">refdb-getref-by-keyword-regexp</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-keyword-regexp</function></funcdef>
+	      <paramdef><parameter>keyword</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a keyword as a regular expression. All references that contain this keyword will be displayed. refdb-mode attempts a regular expression match of the value that you type in. Tab completion is available.</para>
+	</sect3>
+	<sect3 id="command-get-references-periodical" xreflabel="Periodical">
+	  <title>Periodical</title>
+	  <indexterm><primary sortas="getref-by-periodical">refdb-getref-by-periodical</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-periodical</function></funcdef>
+	      <paramdef><parameter>periodical</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of a periodical. All references that were published in this periodical will be displayed. refdb-mode attempts an exact match of the value that you type in. Tab completion is available.</para>
+	</sect3>
+	<sect3 id="command-get-references-periodical-regexp" xreflabel="Periodical (regexp)">
+	  <title>Periodical (regexp)</title>
+	  <indexterm><primary sortas="getref-by-periodical-regexp">refdb-getref-by-periodical-regexp</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-periodical-regexp</function></funcdef>
+	      <paramdef><parameter>periodical</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of a periodical as a regular expression. All references that were published in this periodical will be displayed. refdb-mode attempts a regular expression match of the value that you type in. Tab completion is available.</para>
+	</sect3>
+	<sect3 id="command-get-references-id" xreflabel="ID">
+	  <title>ID</title>
+	  <indexterm><primary sortas="getref-by-id">refdb-getref-by-id</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-id</function></funcdef>
+	      <paramdef><parameter>id</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the numerical ID of a reference which will be displayed. The ID is a unique identifier of each reference which is maintained by RefDB.</para>
+	</sect3>
+	<sect3 id="command-get-references-citationkey" xreflabel="Citation key">
+	  <title>Citation key</title>
+	  <indexterm><primary sortas="getref-by-citekey">refdb-getref-by-citekey</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-citekey</function></funcdef>
+	      <paramdef><parameter>citekey</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the alphanumeric citation key of a reference which will be displayed. The citation key is also an unique identifier which you can set when first adding a reference to the database.</para>
+	</sect3>
+	<sect3 id="command-get-references-advanced" xreflabel="Advanced Search">
+	  <title>Advanced search</title>
+	  <indexterm><primary sortas="getref-by-advanced-search">refdb-getref-by-advanced-search</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-advanced-search</function></funcdef>
+	      <paramdef><parameter>searchstring</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a complete query string. The syntax of <command>getref</command> queries is described in the <ulink url="http://refdb.sourceforge.net/manual/index.html">RefDB manual</ulink>. You may need to escape special characters in order to obtain a valid query string.</para>
+	</sect3>
+      </sect2>
+      <sect2 id="submenu-get-references-on-region" xreflabel="Get References on Region">
+	<title>Get References on Region submenu</title>
+	<para>The commands of this submenu do not ask for a value to search for, but work on a region that you have selected in the current buffer, either by mouse or by setting mark and point appropriately. The contents of the region will be used as the value of your query.</para>
+	<sect3 id="command-get-references-author-region" xreflabel="Author">
+	  <title>Author</title>
+	  <indexterm><primary sortas="getref-by-author-on-region">refdb-getref-by-author-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-author-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of an author regular expression search. All references which contain the given person as an author, editor, or series editor will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-references-title-region" xreflabel="Title">
+	  <title>Title</title>
+	  <indexterm><primary sortas="getref-by-title-on-region">refdb-getref-by-title-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-title-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of a title regular expression search. All references which contain a matching string in the title, the book title, or the series title will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-references-keyword-region" xreflabel="Keyword">
+	  <title>Keyword</title>
+	  <indexterm><primary sortas="getref-by-keyword-on-region">refdb-getref-by-keyword-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-keyword-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of a keyword regular expression search. All references which contain a matching keyword will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-references-periodical-region" xreflabel="Periodical">
+	  <title>Periodical</title>
+	  <indexterm><primary sortas="getref-by-periodical-on-region">refdb-getref-by-periodical-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-periodical-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of a periodical regular expression search. All references which were published in a matching periodical will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-references-id-region" xreflabel="ID">
+	  <title>ID</title>
+	  <indexterm><primary sortas="getref-by-id-on-region">refdb-getref-by-id-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-id-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of an ID search. The reference with the given ID will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-references-citationkey-region" xreflabel="Citation Key">
+	  <title>Citation Key</title>
+	  <indexterm><primary sortas="getref-by-citekey-on-region">refdb-getref-by-citekey-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getref-by-citekey-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of a citation key search. The reference with the given citation key will be displayed.</para>
+	</sect3>
+      </sect2>
+      <sect2 id="command-get-references-from-citation" xreflabel="Get References from Citation">
+	<title>Get References from Citation</title>
+	<indexterm><primary sortas="getref-from-citation">refdb-getref-from-citation</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-getref-from-citation</function></funcdef>
+	    <void/>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>Uses the citation around point to retrieve all cited references in that citation from the database.</para>
+      </sect2>
+      <sect2 id="command-pick-references" xreflabel="Pick References">
+	<title>Pick References</title>
+	<indexterm><primary sortas="pickref">refdb-pickref</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-pickref</function></funcdef>
+	    <paramdef><parameter>idlist</parameter></paramdef>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>Asks interactively for a list of ID values. These references will be added to your personal reference list.</para>
+      </sect2>
+      <sect2 id="command-dump-references" xreflabel="Dump References">
+	<title>Dump References</title>
+	<indexterm><primary sortas="dumpref">refdb-dumpref</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-dumpref</function></funcdef>
+	    <paramdef><parameter>idlist</parameter></paramdef>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>Asks interactively for a list of ID values. These references will be removed from your personal reference list.</para>
+      </sect2>
+      <sect2 id="submenu-convert-references" xreflabel="Convert References">
+	<title>Convert References submenu</title>
+	<para>This submenu offers a variety of commands to convert reference data to and from RIS. All commands work on the data in the current buffer and do not access the RefDB database. Use these commands to import from or export to data formats that RefDB does not support natively. In the first case, the buffer must contain reference data in one of the formats BibTeX, copac, EndNote, ISI, Medline, or MODS. The result will be in RIS format. In the second case the buffer must contain RIS data. The output will be either EndNote or MODS.</para>
+	<sect3 id="command-convert-from-bibtex" xreflabel="From BibTeX">
+	  <title>From BibTeX</title>
+	  <indexterm><primary sortas="import-from-bibtex">refdb-import-from-bibtex</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-import-from-bibtex</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Converts BibTeX data to RIS data.</para>
+	</sect3>
+	<sect3 id="command-convert-from-copac" xreflabel="From copac">
+	  <title>From copac</title>
+	  <indexterm><primary sortas="import-from-copac">refdb-import-from-copac</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-import-from-copac</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Converts copac data to RIS data.</para>
+	</sect3>
+	<sect3 id="command-convert-from-endnote" xreflabel="From EndNote">
+	  <title>From EndNote</title>
+	  <indexterm><primary sortas="import-from-endnote">refdb-import-from-endnote</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-import-from-endnote</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Converts EndNote data to RIS data.</para>
+	</sect3>
+	<sect3 id="command-convert-from-isi" xreflabel="From ISI">
+	  <title>From ISI</title>
+	  <indexterm><primary sortas="import-from-isi">refdb-import-from-isi</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-import-from-isi</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Converts ISI data to RIS data.</para>
+	</sect3>
+	<sect3 id="command-convert-from-medline" xreflabel="From MedLine">
+	  <title>From MedLine</title>
+	  <indexterm><primary sortas="import-from-medline">refdb-import-from-medline</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-import-from-medline</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Converts Medline data to RIS data.</para>
+	</sect3>
+	<sect3 id="command-convert-from-mods" xreflabel="From MODS">
+	  <title>From MODS</title>
+	  <indexterm><primary sortas="import-from-mods">refdb-import-from-mods</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-import-from-mods</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Converts MODS data to RIS data.</para>
+	</sect3>
+	<sect3 id="command-convert-to-endnote" xreflabel="To EndNote">
+	  <title>To EndNote</title>
+	  <indexterm><primary sortas="export-to-endnote">refdb-export-to-endnote</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-export-to-endnote</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Converts RIS data to EndNote data.</para>
+	</sect3>
+	<sect3 id="command-convert-to-MODS" xreflabel="To MODS">
+	  <title>To MODS</title>
+	  <indexterm><primary sortas="export-to-mods">refdb-export-to-mods</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-export-to-mods</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Converts RIS data to MODS data.</para>
+	</sect3>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Managing notes</title>
+      <para>This section contains all commands that you need to manage extended notes.</para>
+      <sect2 id="command-add-notes" xreflabel="Add Notes">
+	<title>Add Notes</title>
+	<indexterm><primary sortas="addnote-on-buffer">refdb-addnote-on-buffer</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-addnote-on-buffer</function></funcdef>
+	    <void/>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>Adds the extended notes in the current buffer to the currently selected database. If nxml-mode considers the buffer to be invalid, an error message is returned and no data are sent to the database</para>
+      </sect2>
+      <sect2 id="command-update-notes" xreflabel="Update Notes">
+	<title>Update Notes</title>
+	<indexterm><primary sortas="updatenote-on-buffer">refdb-updatenote-on-buffer</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-updatenote-on-buffer</function></funcdef>
+	    <void/>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>Updates the extended notes in the current buffer, i.e. existing notes in the database are updated with the data of the current buffer. Works essentially like the <xref linkend="command-add-notes"/> command.</para>
+      </sect2>
+      <sect2 id="command-delete-notes" xreflabel="Delete Notes">
+	<title>Delete Notes</title>
+	<indexterm><primary sortas="deletenote">refdb-deletenote</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-deletenote</function></funcdef>
+	    <paramdef><parameter>idlist</parameter></paramdef>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>Asks interactively for a list of NIDs to delete from the current database. The notes will be permanently removed from the database.</para>
+	<note>
+	  <para>It is not possible to delete notes that you do not own.</para>
+	</note>
+      </sect2>
+      <sect2 id="submenu-get-notes" xreflabel="Get Notes">
+	<title>Get Notes submenu</title>
+	<para>This submenu provides a variety of commands to run simple and complex queries to retrieve extended notes. The commands interactively ask for the value to search for. Wherever appropriate there is a choice between exact matches and regular expressions.</para>
+	<sect3 id="command-get-notes-title" xreflabel="Title">
+	  <title>Title</title>
+	  <indexterm><primary sortas="getnote-by-title">refdb-getnote-by-title</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-title</function></funcdef>
+	      <paramdef><parameter>title</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the title of a reference. All references that use this string as a title will be displayed. refdb-mode attempts an exact match of the value that you type in.</para>
+	</sect3>
+	<sect3 id="command-get-notes-title-regexp" xreflabel="Title (regexp)">
+	  <title>Title (regexp)</title>
+	  <indexterm><primary sortas="getnote-by-title-regexp">refdb-getnote-by-title-regexp</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-title-regexp</function></funcdef>
+	      <paramdef><parameter>title</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a title as a regular expression. All notes that contain a matching string as a title will be displayed. refdb-mode attempts a regular expression match of the value that you type in.</para>
+	</sect3>
+	<sect3 id="command-get-notes-keyword" xreflabel="Keyword">
+	  <title>Keyword</title>
+	  <indexterm><primary sortas="getnote-by-keyword">refdb-getnote-by-keyword</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-keyword</function></funcdef>
+	      <paramdef><parameter>keyword</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a keyword. All extended notes that contain this keyword will be displayed. refdb-mode attempts an exact match of the value that you type in. Tab completion is available.</para>
+	</sect3>
+	<sect3 id="command-get-notes-keyword-regexp" xreflabel="Keyword (regexp)">
+	  <title>Keyword (regexp)</title>
+	  <indexterm><primary sortas="getnote-by-keyword-regexp">refdb-getnote-by-keyword-regexp</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-keyword-regexp</function></funcdef>
+	      <paramdef><parameter>keyword</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a keyword as a regular expression. All extended notes that contain this keyword will be displayed. refdb-mode attempts a regular expression match of the value that you type in. Tab completion is available.</para>
+	</sect3>
+	<sect3 id="command-get-notes-id" xreflabel="Note ID">
+	  <title>Note ID</title>
+	  <indexterm><primary sortas="getnote-by-nid">refdb-getnote-by-nid</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-nid</function></funcdef>
+	      <paramdef><parameter>id</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the numerical ID of an extended note which will be displayed. The ID is a unique identifier of each note which is maintained by RefDB.</para>
+	</sect3>
+	<sect3 id="command-get-notes-citationkey" xreflabel="Citation key">
+	  <title>Citation key</title>
+	  <indexterm><primary sortas="getnote-by-ncitekey">refdb-getnote-by-ncitekey</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-ncitekey</function></funcdef>
+	      <paramdef><parameter>citekey</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the alphanumeric citation key of an extended note which will be displayed. The citation key is also an unique identifier which you can set when first adding a note to the database.</para>
+	</sect3>
+	<sect3 id="command-get-notes-linkedto-author" xreflabel="Linked to Author">
+	  <title>Linked to Author</title>
+	  <indexterm><primary sortas="getnote-by-authorlink">refdb-getnote-by-authorlink</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-authorlink</function></funcdef>
+	      <paramdef><parameter>author</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of an author which will be used for an exact match. All notes which are linked to this author name will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-linkedto-author-regexp" xreflabel="Linked to Author (regexp)">
+	  <title>Linked to Author (regexp)</title>
+	  <indexterm><primary sortas="getnote-by-authorlink-regexp">refdb-getnote-by-authorlink-regexp</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-authorlink-regexp</function></funcdef>
+	      <paramdef><parameter>author</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of an author which will be used for a regexp match. All notes which are linked to this author name will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-linkedto-periodical" xreflabel="Linked to Periodical">
+	  <title>Linked to Periodical</title>
+	  <indexterm><primary sortas="getnote-by-periodicallink">refdb-getnote-by-periodicallink</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-periodicallink</function></funcdef>
+	      <paramdef><parameter>periodical</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of a periodical which will be used for an exact match. All notes which are linked to this periodical will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-linkedto-periodical-regexp" xreflabel="Linked to Periodical (regexp)">
+	  <title>Linked to Periodical (regexp)</title>
+	  <indexterm><primary sortas="getnote-by-periodicallink-regexp">refdb-getnote-by-periodicallink-regexp</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-periodicallink-regexp</function></funcdef>
+	      <paramdef><parameter>periodical</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of a periodical which will be used for a regexp match. All notes which are linked to this periodical will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-linkedto-keyword" xreflabel="Linked to Keyword">
+	  <title>Linked to Keyword</title>
+	  <indexterm><primary sortas="getnote-by-keywordlink">refdb-getnote-by-keywordlink</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-keywordlink</function></funcdef>
+	      <paramdef><parameter>keyword</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a keyword which will be used for an exact match. All notes which are linked to this keyword will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-linkedto-keyword-regexp" xreflabel="Linked to Keyword (regexp)">
+	  <title>Linked to Keyword (regexp)</title>
+	  <indexterm><primary sortas="getnote-by-keywordlink-regexp">refdb-getnote-by-keywordlink-regexp</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-keywordlink-regexp</function></funcdef>
+	      <paramdef><parameter>keyword</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a keyword which will be used for a regexp match. All notes which are linked to this keyword will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-linkedto-id" xreflabel="Linked to ID">
+	  <title>Linked to ID</title>
+	  <indexterm><primary sortas="getnote-by-idlink">refdb-getnote-by-idlink</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-idlink</function></funcdef>
+	      <paramdef><parameter>id</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the ID of a reference. All notes which are linked to this reference will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-linkedto-citekey" xreflabel="Linked to Citation Key">
+	  <title>Linked to Citation Key</title>
+	  <indexterm><primary sortas="getnote-by-citekeylink">refdb-getnote-by-citekeylink</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-citekeylink</function></funcdef>
+	      <paramdef><parameter>citekey</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the citation key of a reference. All notes which are linked to this reference will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-advanced" xreflabel="Advanced Notes Search">
+	  <title>Advanced Notes search</title>
+	  <indexterm><primary sortas="getnote-by-advanced-search">refdb-getnote-by-advanced-search</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-advanced-search</function></funcdef>
+	      <paramdef><parameter>searchstring</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a complete notes query string. The syntax of <command>getnote</command> queries is described in the <ulink url="http://refdb.sourceforge.net/manual/index.html">RefDB manual</ulink>. You may need to escape special characters in order to obtain a valid query string.</para>
+	</sect3>
+      </sect2>
+      <sect2 id="submenu-get-notes-on-region" xreflabel="Get Notes on Region">
+	<title>Get References on Region submenu</title>
+	<para>The commands of this submenu do not ask for a value to search for, but work on a region that you have selected in the current buffer, either by mouse or by setting mark and point appropriately. The contents of the region will be used as the value of your query.</para>
+	<sect3 id="command-get-notes-title-region" xreflabel="Title">
+	  <title>Title</title>
+	  <indexterm><primary sortas="getnote-by-title-on-region">refdb-getnote-by-title-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-title-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of a title regular expression search. All notes which contain the given title will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-keyword-region" xreflabel="Keyword">
+	  <title>Keyword</title>
+	  <indexterm><primary sortas="getnote-by-keyword-on-region">refdb-getnote-by-keyword-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-keyword-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of a keyword regular expression search. All notes which contain a matching keyword will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-authorlink-region" xreflabel="Linked to Author">
+	  <title>Linked to Author</title>
+	  <indexterm><primary sortas="getnote-by-authorlink-on-region">refdb-getnote-by-authorlink-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-authorlink-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of an author name regular expression search. All notes which are linked to a matching person will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-keywordlink-region" xreflabel="Linked to Keyword">
+	  <title>Linked to Keyword</title>
+	  <indexterm><primary sortas="getnote-by-keywordlink-on-region">refdb-getnote-by-keywordlink-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-keywordlink-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of a keyword regular expression search. All notes which are linked to a matching keyword will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-periodicallink-region" xreflabel="Linked to Periodical">
+	  <title>Linked to Periodical</title>
+	  <indexterm><primary sortas="getnote-by-periodicallink-on-region">refdb-getnote-by-periodicallink-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-periodicallink-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of a periodical search. Notes which are linked to a matching periodical will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-idlink-region" xreflabel="Linked to ID">
+	  <title>Linked to ID</title>
+	  <indexterm><primary sortas="getnote-by-idlink-on-region">refdb-getnote-by-idlink-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-idlink-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of a reference ID search. Notes linked to the reference with the given ID will be displayed.</para>
+	</sect3>
+	<sect3 id="command-get-notes-citekeylink-region" xreflabel="Linked to Citation Key">
+	  <title>Linked to Citation Key</title>
+	  <indexterm><primary sortas="getnote-by-citekeylink-on-region">refdb-getnote-by-citekeylink-on-region</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getnote-by-citekeylink-on-region</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Uses the selected region as the value of a reference citation key search. Notes linked to the reference with the given citation key will be displayed.</para>
+	</sect3>
+      </sect2>
+      <sect2 id="command-add-links" xreflabel="Add Links">
+	<title>Add Links</title>
+	<indexterm><primary sortas="addlink">refdb-addlink</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-addlink</function></funcdef>
+	    <void/>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>Asks interactively for the ID of an extended note, and for a list of items to link to. Appropriate links will be added to the note.</para>
+      </sect2>
+      <sect2 id="command-delete-links" xreflabel="Delete Links">
+	<title>Delete Links</title>
+	<indexterm><primary sortas="deletelink">refdb-deletelink</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-deletelink</function></funcdef>
+	    <void/>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>Asks interactively for the ID of an extended note, and for a list of items to be unlinked. Matching links will be deleted from the note.</para>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Reference formats and databases</title>
+      <sect2 id="submenu-customize-data-output" xreflabel="Customize Data Output">
+	<title>Customize data output submenu</title>
+	<para>This submenu offers commands to switch between different data output types for references and notes, as well as the output formats of reference data and of citations.</para>
+	<sect3 id="command-select-reference-output-type" xreflabel="Select Reference Output Type">
+	  <title>Select Reference Output Type</title>
+	  <indexterm><primary sortas="select-data-output-type">refdb-select-data-output-type</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-select-data-output-type</function></funcdef>
+	      <paramdef><parameter>outputtype</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Reference data can be retrieved in a variety of formats. If you use the menu command, a submenu with the available types will pop up. If you run the command in the minibuffer, please be aware that the argument is a symbol, not a string.</para>
+	  <note>
+	    <para>RIS and RISX are the most convenient types for working with references, as they can be updated in the database without further conversion. The other types are useful for exporting the data.</para>
+	  </note>
+	</sect3>
+	<sect3 id="command-select-notes-output-type" xreflabel="Select Notes Output Type">
+	  <title>Select Notes Output Type</title>
+	  <indexterm><primary sortas="select-notesdata-output-type">refdb-select-notesdata-output-type</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-select-notesdata-output-type</function></funcdef>
+	      <paramdef><parameter>outputtype</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Notes data can also be retrieved in several formats. If you use the menu command, a submenu with the available types will pop up. If you run the command in the minibuffer, please be aware that the argument is a symbol, not a string.</para>
+	  <note>
+	    <para>xnote is the only type suitable for working with notes, as they can be updated in the database without further conversion. The other types are useful for exporting the data.</para>
+	  </note>
+	</sect3>
+	<sect3 id="command-select-output-format" xreflabel="Select Output Format">
+	  <title>Select Output Format</title>
+	  <indexterm><primary sortas="select-data-output-format">refdb-select-data-output-format</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-select-data-output-format</function></funcdef>
+	      <paramdef><parameter>format</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Selects the reference data output format. This will only affect output types other than RIS and RISX which always return all available information. With all other types only a reasonable subset is displayed by default. You can choose to display only ID values, all fields, or selected fields. If you run the command from the minibuffer, please note that format is a symbol, not a string.</para>
+	</sect3>
+	<sect3 id="command-select-additional-data-fields" xreflabel="Select Additional Data Fields">
+	  <title>Select Additional Data Fields</title>
+	  <indexterm><primary sortas="select-additional-data-fields">refdb-select-additional-data-fields</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-select-additional-data-fields</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Invokes the customization page for the appropriate variable which holds a list of data fields to display.</para>
+	</sect3>
+	<sect3 id="command-select-citation-output-type" xreflabel="Select Citation Output Type">
+	  <title>Select Citation Output Type</title>
+	  <indexterm><primary sortas="select-citation-type">refdb-select-citation-type</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-select-citation-type</function></funcdef>
+	      <paramdef><parameter>citationtype</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Selects the output type of citations. The short and the full citation type are available. The default is full, and you should not change this unless you know what you're doing.</para>
+	</sect3>
+	<sect3 id="command-select-citation-output-format" xreflabel="Select Citation Output Format">
+	  <title>Select Citation Output Format</title>
+	  <indexterm><primary sortas="select-citation-format">refdb-select-citation-format</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-select-citation-format</function></funcdef>
+	      <paramdef><parameter>citationformat</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Selects the output format of citations. The default is the XML syntax, but you can select the SGML syntax for SGML documents. The <sgmltag class="element">xref</sgmltag> element is empty, therefore the XML version requires an additional slash to denote this fact.</para>
+	</sect3>
+      </sect2>
+      <sect2 id="command-select-database" xreflabel="Select Database">
+	<title>Select Database</title>
+	<indexterm><primary sortas="select-database">refdb-select-database</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-select-database</function></funcdef>
+	    <paramdef><parameter>database</parameter></paramdef>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>If used from the menu, this command will pop up a submenu with all databases that the current user has access to. The currently selected database is marked accordingly. Select one of the available databases to make it the active database.</para>
+	<para>If called interactively, this command will prompt the user with a completion list of available databases.</para>
+      </sect2>
+      <sect2 id="command-show-database-info" xreflabel="Show Database Info">
+	  <title>Show Database Info</title>
+	  <indexterm><primary sortas="whichdb">refdb-whichdb</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-whichdb</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Displays some information about the currently selected database.</para>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Managing documents</title>
+      <para>This section of the menu contains the functions related to creating and publishing bibliographies.</para>
+      <sect2 id="command-create-document" xreflabel="Create Document">
+	  <title>Create Document</title>
+	  <indexterm><primary sortas="create-document">refdb-create-document</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-create-document</function></funcdef>
+	      <paramdef><parameter>type</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>This command will interactively ask for the information required to run the refdbnd script. When you run this command from the menu, it will pop up a submenu with the available document types. refdbnd will create a skeleton document and a Makefile which controls the transformation steps. Depending on the customization settings, refdb-mode will load the short or the full citation format document when done. You can edit this document right away.</para>
+      </sect2>
+      <sect2 id="submenu-cite-references" xreflabel="Cite References">
+	  <title>Cite References submenu</title>
+	  <para>This submenu contains the command to create citations of references and put them into the kill ring. The citations are then available to be yanked in your source document.</para>
+	  <sect3 id="command-create-docbook-citation-from-point" xreflabel="Current as DocBook">
+	    <title>Current as DocBook</title>
+	    <indexterm><primary sortas="create-docbook-citation-from-point">refdb-create-docbook-citation-from-point</primary></indexterm>
+	    <funcsynopsis>
+	      <funcprototype>
+		<funcdef><function>refdb-create-docbook-citation-from-point</function></funcdef>
+		<void/>
+	      </funcprototype>
+	    </funcsynopsis>
+	    <para>Creates a DocBook citation element from the reference (in RIS or RISX format) containing point and puts it into the kill ring.</para>
+	  </sect3>
+	  <sect3 id="command-create-tei-citation-from-point" xreflabel="Current as TEI">
+	    <title>Current as TEI</title>
+	    <indexterm><primary sortas="create-tei-citation-from-point">refdb-create-tei-citation-from-point</primary></indexterm>
+	    <funcsynopsis>
+	      <funcprototype>
+		<funcdef><function>refdb-create-tei-citation-from-point</function></funcdef>
+		<void/>
+	      </funcprototype>
+	    </funcsynopsis>
+	    <para>Creates a TEI citation element from the reference (in RIS or RISX format) containing point and puts it into the kill ring.</para>
+	  </sect3>
+	  <sect3 id="command-create-docbook-citation-on-region" xreflabel="In Region as DocBook">
+	    <title>In Region as DocBook</title>
+	    <indexterm><primary sortas="create-docbook-citation-on-region">refdb-create-docbook-citation-on-region</primary></indexterm>
+	    <funcsynopsis>
+	      <funcprototype>
+		<funcdef><function>refdb-create-docbook-citation-on-region</function></funcdef>
+		<void/>
+	      </funcprototype>
+	    </funcsynopsis>
+	    <para>Creates a DocBook citation element from the references (in RIS or RISX format) contained in the current region and puts it into the kill ring.</para>
+	  </sect3>
+	  <sect3 id="command-create-tei-citation-on-region" xreflabel="In Region as TEI">
+	    <title>In Region as TEI</title>
+	    <indexterm><primary sortas="create-tei-citation-on-region">refdb-create-citation-on-region</primary></indexterm>
+	    <funcsynopsis>
+	      <funcprototype>
+		<funcdef><function>refdb-create-tei-citation-on-region</function></funcdef>
+		<void/>
+	      </funcprototype>
+	    </funcsynopsis>
+	    <para>Creates a TEI citation element from the reference (in RIS or RISX format) contained in the current region and puts it into the kill ring.</para>
+	  </sect3>
+      </sect2>
+      <sect2 id="command-transform-document" xreflabel="Transform Document">
+	  <title>Transform Document</title>
+	  <indexterm><primary sortas="transform">refdb-transform</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-transform</function></funcdef>
+	      <paramdef><parameter>type</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Transforms the current document to an output format. If run from the menu, a submenu with the available targets will pop up. This command will run the appropriate Makefile target to achieve the transformation. Before the actual transformation takes place, the linkends will be normalized and the user is asked to save any changes.</para>
+      </sect2>
+      <sect2 id="command-view-output" xreflabel="View Output">
+	  <title>View Output</title>
+	  <indexterm><primary sortas="view-output">refdb-view-output</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-view-output</function></funcdef>
+	      <paramdef><parameter>type</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Runs an appropriate viewer for the output generated by <xref linkend="command-transform-document"/>. If run from the menu, a submenu with the available output types will pop up. The viewer will usually run in a separate window.</para>
+      </sect2>
+    </sect1>
+    <sect1 id="sect-database-management">
+      <title>Database management</title>
+      <para>Commands to manage reference databases.</para>
+      <sect2 id="command-create-databases" xreflabel="Create Databases">
+	  <title>Create Databases</title>
+	  <indexterm><primary sortas="createdb">refdb-createdb</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-createdb</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of a new reference database and for the default character encoding. After the database is created, you may have to run <xref linkend="command-add-users"/> to grant users access to the new database.</para>
+      </sect2>
+      <sect2 id="command-list-databases" xreflabel="List Databases">
+	  <title>List Databases</title>
+	  <indexterm><primary sortas="listdb">refdb-listdb</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-listdb</function></funcdef>
+	      <paramdef><parameter>dbname</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a regular expression used to list reference databases. An empty string causes refdb-mode to list all available reference databases.</para>
+      </sect2>
+      <sect2 id="command-delete-databases" xreflabel="Delete Databases">
+	  <title>Delete Databases</title>
+	  <indexterm><primary sortas="deletedb">refdb-deletedb</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-deletedb</function></funcdef>
+	      <paramdef><parameter>dbname</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of an existing reference database that should be deleted. Minibuffer completion against the list of existing databases is available.</para>
+      </sect2>
+    </sect1>
+    <sect1 id="sect-styles-management">
+      <title>Bibliography styles management</title>
+      <para>This menu section contains all functions to work with bibliography style data.</para>
+      <sect2 id="command-add-styles" xreflabel="Add Styles">
+	  <title>Add Styles</title>
+	  <indexterm><primary sortas="addstyle-on-buffer">refdb-addstyle-on-buffer</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-addstyle-on-buffer</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Adds the XML data using the citestylex.dtd in the current buffer to the system database. refdb-mode will refuse to add the data if nxml-mode indicates they are invalid. If the database already contains a style with the given name, it will be replaced with the new version.</para>
+      </sect2>
+      <sect2 id="command-list-styles" xreflabel="List Styles">
+	  <title>List Styles</title>
+	  <indexterm><primary sortas="liststyle">refdb-liststyle</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-liststyle</function></funcdef>
+	      <paramdef><parameter>stylename</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a regular expression used to list bibliography styles. An empty string causes refdb-mode to list all available styles.</para>
+      </sect2>
+      <sect2 id="command-get-styles" xreflabel="Get Style">
+	  <title>Get Style</title>
+	  <indexterm><primary sortas="getstyle">refdb-getstyle</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-getstyle</function></funcdef>
+	      <paramdef><parameter>stylename</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of a bibliography style which is then retrieved in XML format. Minibuffer completion against the list of existing styles is available.</para>
+      </sect2>
+      <sect2 id="command-delete-styles" xreflabel="Delete Styles">
+	  <title>Delete Styles</title>
+	  <indexterm><primary sortas="deletestyle">refdb-deletestyle</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-deletestyle</function></funcdef>
+	      <paramdef><parameter>stylename</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of a bibliography style that should be deleted. Minibuffer completion against the list of existing styles is available.</para>
+      </sect2>
+    </sect1>
+    <sect1 id="sect-user-management">
+      <title>User management</title>
+      <para>These functions provide an interface to the RefDB user management.</para>
+      <sect2 id="command-add-users" xreflabel="Add Users">
+	  <title>Add Users</title>
+	  <indexterm><primary sortas="adduser">refdb-adduser</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-adduser</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Interactively asks for the name of the database access should be granted to, the hostname from which connections should be allowed, the database username, and an optional database password if the user is not yet known to the database engine. The user will be registered as a RefDB user using these data. She will have access to the system database and to the given reference database.</para>
+	  <note>
+	    <para>The hostname is required only for MySQL. It is the name of the computer where refdbd, the RefDB daemon runs. If it runs on your local computer, the proper value may be "localhost" or the true hostname/IP address, depending on the OS and the database engine.</para>
+	  </note>
+      </sect2>
+      <sect2 id="command-list-users" xreflabel="List Users">
+	  <title>List Users</title>
+	  <indexterm><primary sortas="listuser">refdb-listuser</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-listuser</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of the database and for a regular expression used to list users which have references or notes in that database. Minibuffer completion is available against the list of available databases. An empty string as the username causes refdb-mode to list all available users of the given database.</para>
+      </sect2>
+      <sect2 id="command-delete-users" xreflabel="Delete Users">
+	  <title>Delete Users</title>
+	  <indexterm><primary sortas="deleteuser">refdb-deleteuser</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-deleteuser</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of a user whose access to a reference database should be revoked. Additionally, the database name and the hostname must be specified. Minibuffer completion against the list of existing databases is available.</para>
+      </sect2>
+    </sect1>
+    <sect1 id="sect-titlewords-management">
+      <title>Journal title word management</title>
+      <para>Commands to maintain the word list used to identify unabbreviated words in journal names.</para>
+      <sect2 id="command-add-journal-title-words" xreflabel="Add Journal Title Words">
+	  <title>Add Journal Title Words</title>
+	  <indexterm><primary sortas="addword">refdb-addword</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-addword</function></funcdef>
+	      <paramdef><parameter>wordlist</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a whitespace-separated list of words which are unabbreviated journal title words. These words will be added to the system database.</para>
+      </sect2>
+      <sect2 id="command-list-journal-title-words" xreflabel="List Journal Title Words">
+	  <title>List Journal Title Words</title>
+	  <indexterm><primary sortas="listword">refdb-listword</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-listword</function></funcdef>
+	      <paramdef><parameter>word</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a regular expression used to list unabbreviated journal title words. An empty string causes refdb-mode to list all available journal title words.</para>
+      </sect2>
+      <sect2 id="command-delete-journal-title-words" xreflabel="Delete Journal Title Words">
+	  <title>Delete Journal Title Words</title>
+	  <indexterm><primary sortas="deleteword">refdb-deleteword</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-deleteword</function></funcdef>
+	      <paramdef><parameter>wordlist</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for a list of words that is to be deleted from the list of unabbreviated journal title words.</para>
+      </sect2>
+    </sect1>
+    <sect1 id="sect-misc-management">
+      <title>Miscellaneous server tasks</title>
+      <para>These are commands that don't really fit anywhere else.</para>
+      <sect2 id="command-run-keyword-scan" xreflabel="Run Keyword Scan">
+	  <title>Run Keyword Scan</title>
+	  <indexterm><primary sortas="scankw">refdb-scankw</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-scankw</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Initiates a background keyword scan.</para>
+      </sect2>
+      <sect2 id="command-view-server-information" xreflabel="View Server Information">
+	  <title>View Server Information</title>
+	  <indexterm><primary sortas="viewstat">refdb-viewstat</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-viewstat</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Displays the RefDB server status information.</para>
+      </sect2>
+    </sect1>
+    <sect1 id="sect-backup-management">
+      <title>Database backup management</title>
+      <para>You should backup your precious reference and notes data once in a while. The commands in this menu section provide a simple interface for this task.</para>
+      <sect2 id="command-backup-reference-databases" xreflabel="Backup Reference Databases">
+	  <title>Backup Reference Databases</title>
+	  <indexterm><primary sortas="backup-database">refdb-backup-database</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-backup-database</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of a reference database and creates an SQL dump of the data. Minibuffer completion is available for selecting the database. Asks for the name of the file to save the data to.</para>
+      </sect2>
+      <sect2 id="command-restore-reference-databases" xreflabel="Restore Reference Databases">
+	  <title>Restore Reference Databases</title>
+	  <indexterm><primary sortas="restore-database">refdb-restore-database</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-restore-database</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Asks interactively for the name of the database and for the name of a reference database SQL dump file. Minibuffer completion is available for selecting the file. A database with the given name will be created, and the data from the dump file will be filled in.</para>
+	  <warning>
+	    <para>Before creating the database, an existing database with the same name will be dropped.</para>
+	  </warning>
+      </sect2>
+    </sect1>
+    <sect1 id="sect-refdbmode-customization">
+      <title>refdb-mode customization</title>
+      <para>These commands help you to set up RefDB in the first place and to adapt RefDB and refdb-mode to your needs.</para>
+      <sect2 id="command-initialize-system-database" xreflabel="Initialize System Database">
+	  <title>Initialize System Database</title>
+	  <indexterm><primary sortas="init-refdb">refdb-init-refdb</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-init-refdb</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Initializes the system database. Use this command once to initialize your RefDB installation.</para>
+	  <warning>
+	    <para>This command will destructively replace any existing RefDB system database.</para>
+	  </warning>
+      </sect2>
+      <sect2 id="command-customize-refdb-mode" xreflabel="Customize RefDB Mode">
+	  <title>Customize RefDB Mode</title>
+	  <para>This menu command invokes the Emacs customization buffer for RefDB.</para>
+      </sect2>
+      <sect2 id="submenu-edit-refdb-config-files" xreflabel="Edit RefDB Config Files">
+	  <title>Edit RefDB Config Files</title>
+	  <para>The commands in this submenu open one of the RefDB configuration files in Emacs to change the persistent configuration of the RefDB applications. User configuration files will be opened in a new window in the same Emacs frame. Global configuration files will be opened in another Emacs instance which is started using <command>sudo</command> to obtain the required permissions.</para>
+	  <indexterm><primary sortas="edit-refdbarc">refdb-edit-refdbarc</primary></indexterm>
+	  <indexterm><primary sortas="edit-refdbcrc">refdb-edit-refdbcrc</primary></indexterm>
+	  <indexterm><primary sortas="edit-refdbibrc">refdb-edit-refdbibrc</primary></indexterm>
+	  <indexterm><primary sortas="edit-global-refdbarc">refdb-edit-global-refdbarc</primary></indexterm>
+	  <indexterm><primary sortas="edit-global-refdbcrc">refdb-edit-global-refdbcrc</primary></indexterm>
+	  <indexterm><primary sortas="edit-global-refdbibrc">refdb-edit-global-refdbibrc</primary></indexterm>
+	  <indexterm><primary sortas="edit-global-refdbdrc">refdb-edit-global-refdbdrc</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-edit-refdbarc</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Edit the <command>refdba</command> user configuration file.</para>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-edit-refdbcrc</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Edit the <command>refdbc</command> user configuration file.</para>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-edit-refdbibrc</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Edit the <command>refdbib</command> user configuration file.</para>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-edit-global-refdbarc</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Edit the global <command>refdba</command> configuration file.</para>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-edit-global-refdbcrc</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Edit the global <command>refdbc</command> configuration file.</para>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-edit-global-refdbibrc</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Edit the global <command>refdbib</command> configuration file.</para>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-edit-global-refdbdrc</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Edit the global <command>refdbd</command> configuration file.</para>
+      </sect2>
+    </sect1>
+    <sect1 id="sect-server-management">
+      <title>RefDB server management</title>
+      <para>These commands allow to control the RefDB application server. This works only if <command>refdbd</command> runs on your local computer. All of these commands require root permissions.</para>
+      <sect2 id="command-start-application-server-on-localhost" xreflabel="Start Application Server on localhost">
+	  <title>Start Application Server on localhost</title>
+	  <indexterm><primary sortas="start-server">refdb-start-server</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-start-server</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Start the <command>refdbd</command> application server.</para>
+      </sect2>
+      <sect2 id="command-stop-application-server-on-localhost" xreflabel="Stop Application Server on localhost">
+	  <title>Stop Application Server on localhost</title>
+	  <indexterm><primary sortas="stop-server">refdb-stop-server</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-stop-server</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Stop the <command>refdbd</command> application server.</para>
+      </sect2>
+      <sect2 id="command-restart-application-server-on-localhost" xreflabel="Restart Application Server on localhost">
+	  <title>Restart Application Server on localhost</title>
+	  <indexterm><primary sortas="restart-server">refdb-restart-server</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-restart-server</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Restart the <command>refdbd</command> application server. The running instance terminates, and a new instance is started.</para>
+      </sect2>
+      <sect2 id="command-reload-application-server-on-localhost" xreflabel="Reload Application Server on localhost">
+	  <title>Reload Application Server on localhost</title>
+	  <indexterm><primary sortas="reload-server">refdb-reload-server</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-reload-server</function></funcdef>
+	      <void/>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>Causes the running instance of the <command>refdbd</command> application server to read its configuration file again.</para>
+      </sect2>
+    </sect1>
+  </chapter>
+  <index/>
+</book>

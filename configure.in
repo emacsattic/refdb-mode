@@ -1,0 +1,49 @@
+dnl Process this file with autoconf to produce a configure script.
+dnl $Id: configure.in,v 1.7 2005/12/25 00:27:49 mhoenicka Exp $
+
+dnl check for one of the source files
+AC_INIT(refdb-mode.el)
+AM_INIT_AUTOMAKE(refdb-elisp, 1.2)
+
+dnl find Emacs and set site-lisp path
+AM_PATH_LISPDIR
+
+dnl find RefDB programs
+AC_PATH_PROG(myrefdbd, refdbd, refdbd)
+AC_PATH_PROG(myrefdbctl, refdbctl, refdbctl)
+AC_PATH_PROG(myrefdbc, refdbc, refdbc)
+AC_PATH_PROG(myrefdba, refdba, refdbc)
+AC_PATH_PROG(myrefdbnd, refdbnd, refdbnd)
+
+dnl find external apps
+AC_PATH_PROG(mysudo, sudo, sudo)
+AC_PATH_PROGS(mygnumake, gmake make, make)
+AC_PATH_PROGS(mypdfviewer, acroread xpdf gv kpdf gpdf gnome-gv kghostview evince Preview AcroRd32, gv, [$PATH:/opt/csw/bin:/Applications/Preview.app/Contents/MacOS])
+AC_PATH_PROGS(mypsviewer, gv kghostview gnome-gv ggv bmv gsview32 Preview, gv, [$PATH:/opt/csw/bin:/Applications/Preview.app/Contents/MacOS])
+AC_PATH_PROGS(myrtfviewer, soffice oowriter abiword ted Ted kword TextEdit openoffice.org-2.0.0 openoffice.org-1.1.4 write, soffice, [$PATH:/opt/csw/bin:/Applications/TextEdit.app/Contents/MacOS])
+AC_PATH_PROGS(myshell, sh ash bash, sh)
+
+AC_SUBST(lispdir)
+AC_SUBST(mysudo)
+AC_SUBST(myrefdbd)
+AC_SUBST(myrefdbctl)
+AC_SUBST(myrefdbc)
+AC_SUBST(myrefdba)
+AC_SUBST(myrefdbnd)
+AC_SUBST(mygnumake)
+AC_SUBST(mypdfviewer)
+AC_SUBST(mypsviewer)
+AC_SUBST(myrtfviewer)
+AC_SUBST(myshell)
+
+AC_OUTPUT(Makefile)
+
+if test "$myrefdbd" = "refdbd" || test "$myrefdbctl" = "myrefdbctl" || test "$myrefdbc" = "refdbc" || test "$myrefdba" = "refdba" || test "$myrefdbnd" = "refdbnd"; then
+   echo "***WARNING***
+   echo "Some of the RefDB applications appear to be missing. Make sure to install them in your PATH before running refdb-mode"
+fi
+
+if test "$mysudo" = "sudo"; then
+   echo "***WARNING***
+   echo "sudo appears to be missing on your system. Without sudo the administrative interface of refdb-mode will lack important functionality"
+fi

@@ -1,0 +1,44 @@
+## $Id: Makefile.am,v 1.7 2005/12/25 00:28:44 mhoenicka Exp $
+## Process this file with automake to produce Makefile.in
+lisp_LISP = ris.el refdb-mode.el
+
+sysconf_DATA = refdb-mode-config.el
+
+docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
+doc_DATA = refdb-mode-manual.pdf refdb-mode-manual/*
+
+info_TEXINFOS = refdb-mode.texi
+
+EXTRA_DIST = $(lisp_LISP) $(doc_DATA) $(manual_DATA) refdb-mode-manual.xml refdb-mode.texi refdb-mode-config.el.in
+
+MAINTAINERCLEANFILES = $(doc_DATA) refdb-mode-manual.fo
+CLEANFILES = refdb-mode-config.el
+
+fosheet="http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl"
+
+htmlsheet="http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl"
+
+all: refdb-mode-config.el refdb-mode-manual.pdf refdb-mode-manual/* refdb-mode.texi
+
+refdb-mode-config.el: refdb-mode-config.el.in
+	sed 's%<myrtfviewer>%$(myrtfviewer)%' < $(srcdir)/refdb-mode-config.el.in | \
+	sed 's%<mypsviewer>%$(mypsviewer)%' | \
+	sed 's%<mypdfviewer>%$(mypdfviewer)%' | \
+	sed 's%<mygnumake>%$(mygnumake)%' | \
+	sed 's%<myshell>%$(myshell)%' | \
+	sed 's%<sysconfdir>%$(sysconfdir)%' > refdb-mode-config.el
+
+refdb-mode-manual.pdf: refdb-mode-manual.xml
+	xsltproc --stringparam funcsynopsis.style ansi $(fosheet) refdb-mode-manual.xml > refdb-mode-manual.fo
+	fop -fo refdb-mode-manual.fo -pdf refdb-mode-manual.pdf
+
+refdb-mode-manual/*: refdb-mode-manual.xml
+	rm -rf refdb-mode-manual/*
+	mkdir -p refdb-mode-manual
+	xsltproc --stringparam funcsynopsis.style ansi --stringparam html.stylesheet manual.css -o refdb-mode-manual/ $(htmlsheet) refdb-mode-manual.xml
+	cp manual.css refdb-mode-manual
+
+refdb-mode.texi: refdb-mode-manual.xml
+	docbook2texi refdb-mode-manual.xml
+
+
