@@ -16,7 +16,7 @@
   </bookinfo>
   <preface>
     <title>Preface</title>
-    <para>refdb-mode turns GNU Emacs into a frontend for <ulink url="http://refdb.sourceforge.net">RefDB</ulink>, a reference manager and bibliography tool for markup languages. refdb-mode is a minor mode which works well alongside the major modes PSGML (SGML editing), nxml-mode (XML editing), and ris-mode (RIS editing). It offers a full set of menu commands for reference and notes management, allowing you to conveniently use Emacs to create or update references and notes. Moreover, it allows you to create DocBook and TEI documents for use with RefDB. You can transform the documents and view the results with a mouseclick. It integrates seamlessly into your authoring process, allowing you to search for references and yank them directly in place, without ever leaving Emacs. Finally, there is also a full set of administrative commands to control all aspects of RefDB configuration and administration.</para>
+    <para>refdb-mode turns GNU Emacs into a frontend for <ulink url="http://refdb.sourceforge.net">RefDB</ulink>, a reference manager and bibliography tool for markup languages. refdb-mode is a minor mode which works well alongside the major modes PSGML (SGML editing), nxml-mode (XML editing), auctex (LaTeX editing), and ris-mode (RIS editing). It offers a full set of menu commands for reference and notes management, allowing you to conveniently use Emacs to create or update references and notes. Moreover, it allows you to create DocBook and TEI documents for use with RefDB. You can transform the documents and view the results with a mouseclick. It integrates seamlessly into your authoring process, allowing you to search for references and yank them directly in place, without ever leaving Emacs. Finally, there is also a full set of administrative commands to control all aspects of RefDB configuration and administration.</para>
     <para>This manual gives a brief overview of how to use refdb-mode, followed by a more thorough description of all available commands.</para>
     <para>Please visit the <ulink url="http://refdb.sourceforge.net">RefDB web page</ulink> for further information about RefDB and for the addresses of mailing lists where problems with refdb-mode can be discussed.</para>
   </preface>
@@ -212,7 +212,91 @@
     <sect1>
       <title>Screen layout</title>
       <para>Whenever you run refdb-mode commands which create output (as opposed to status messages which are displayed in the echo area), two windows open and display the results. The <varname>*refdb-output*</varname> buffer displays the command results proper, e.g. the bibliographic data which the commands in the <guisubmenu>Get References</guisubmenu> submenu create. refdb-mode tries to infer the proper major mode for the type of data, e.g. it will load ris-mode for RIS data and nxml-mode for any of the XML formats. The modeline shows the major mode used as well as the character encoding. The <varname>*refdb-messages*</varname> buffer keeps a log of the result summaries, e.g. the number of retrieved references.</para>
+      <tip>
+	<para>If you want to preserve search results displayed in the <varname>*refdb-output*</varname> buffer for later use, simply rename the buffer: <keycombo><keycap>M</keycap><keycap>x</keycap></keycombo><userinput>rename-buffer <replaceable>newname</replaceable></userinput>. This temporary buffer is not associated with a file, although you can of course write it to a file using <keycombo><keycap>C</keycap><keycap>x</keycap></keycombo><keycombo><keycap>C</keycap><keycap>w</keycap></keycombo>. Your next query will generate another buffer called <varname>*refdb-output*</varname>. You can repeat this process any number of times to preserve an unlimited number of query results.</para>
+      </tip>
       <para>Commands that require additional data will prompt for these in the minibuffer. You can use the minibuffer history to recover any previously used input. In most cases you can also use minibuffer completion (<keycap>tab</keycap> or <keycap>space</keycap> key) to fill in the remainder of an argument or to choose between alternatives.</para>
+    </sect1>
+    <sect1>
+      <title>Key bindings</title>
+      <para>The most common refdb-mode commands are accessible through keyboard shortcuts. The common prefix of these commands is <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo>. The remainder of the key sequences are grouped by the purpose of the commands in a similar fashion as in the menu. Reference and notes management functions use <keycap>r</keycap> and <keycap>n</keycap> as a prefix, respectively. Commands that retrieve references by exact match and by regexp match use <keycap>g</keycap> and <keycap>x</keycap> as a prefix, respectively. The corresponding prefixes for notes management are <keycap>o</keycap> and <keycap>p</keycap>. Retrieving references and notes on region requires the <keycombo><keycap>Ctrl</keycap><keycap>g</keycap></keycombo> and <keycombo><keycap>Ctrl</keycap><keycap>o</keycap></keycombo> prefixes. Select commands use the <keycap>s</keycap> prefix, and commands related to transforming documents and citing references use <keycap>c</keycap> as a prefix.</para>
+      <table frame="all">
+	<title>refdb-mode key bindings</title>
+	<tgroup cols="3" align="left" colsep="1" rowsep="1">
+	  <colspec colwidth="1*"/>
+	  <colspec colwidth="3*"/>
+	  <colspec colwidth="2*"/>
+	  <thead>
+	    <row>
+	      <entry>common prefix</entry>
+	      <entry>action</entry>
+	      <entry>target</entry>
+	    </row>
+	  </thead>
+	  <tbody>
+	    <row>
+	      <entry><para><keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo></para></entry>
+	      <entry>
+		<para>modify references: <keycap>r</keycap></para>
+		<para>modify notes: <keycap>n</keycap></para>
+	      </entry>
+	      <entry>
+		<para>add: <keycap>a</keycap></para>
+		<para>update: <keycap>u</keycap></para>
+		<para>delete: <keycap>d</keycap></para>
+	      </entry>
+	    </row>
+	    <row>
+	      <entry><para><keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo></para></entry>
+	      <entry>
+		<para>get reference (exact): <keycap>g</keycap></para>
+		<para>get reference (regexp): <keycap>x</keycap></para>
+		<para>get reference on region: <keycombo><keycap>Ctrl</keycap><keycap>g</keycap></keycombo></para>
+		<para>get note (exact): <keycap>o</keycap></para>
+		<para>get note (regexp): <keycap>p</keycap></para>
+		<para>get note on region: <keycombo><keycap>Ctrl</keycap><keycap>o</keycap></keycombo></para>
+	      </entry>
+	      <entry>
+		<para>author: <keycap>a</keycap></para>
+		<para>title: <keycap>t</keycap></para>
+		<para>keyword: <keycap>k</keycap></para>
+		<para>periodical: <keycap>p</keycap></para>
+		<para>ID: <keycap>i</keycap></para>
+		<para>citation key: <keycap>c</keycap></para>
+		<para>advanced: <keycap>d</keycap></para>
+		<para>keywordlink: <keycap>l</keycap></para>
+		<para>IDlink: <keycap>q</keycap></para>
+		<para>citation key link: <keycap>v</keycap></para>
+	      </entry>
+	    </row>
+	    <row>
+	      <entry><para><keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo></para></entry>
+	      <entry>
+		<para>select: <keycap>s</keycap></para>
+	      </entry>
+	      <entry>
+		<para>database: <keycap>d</keycap></para>
+		<para>reference output type: <keycap>r</keycap></para>
+		<para>notes output type: <keycap>n</keycap></para>
+	      </entry>
+	    </row>
+	    <row>
+	      <entry><para><keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo></para></entry>
+	      <entry><para>transform: <keycap>c</keycap></para></entry>
+	      <entry>
+		<para>transform document: <keycap>c</keycap></para>
+		<para>view document: <keycap>v</keycap></para>
+		<para>cite as DocBook from point: <keycap>d</keycap></para>
+		<para>cite as TEI from point: <keycap>t</keycap></para>
+		<para>cite as LaTeX from point: <keycap>l</keycap></para>
+		<para>cite as DocBook (region): <keycap>s</keycap></para>
+		<para>cite as TEI (region): <keycap>t</keycap></para>
+		<para>cite as LaTeX (region): <keycap>x</keycap></para>
+	      </entry>
+	    </row>
+	  </tbody>
+	</tgroup>
+      </table>
     </sect1>
     <sect1>
       <title>refdb-mode is schizophrenic</title>
@@ -277,7 +361,7 @@
   </chapter>
   <chapter id="chapter-commands">
     <title>refdb-mode commands</title>
-    <para>Essentially all commands are accessible through the menu. The <guimenu>RefDB</guimenu> menu is subdivided into several sections. We'll discuss the sections in the order of appearance. Each description contains the synopsis of the refdb-mode command, i.e. what you'll have to type in after pressing <keycombo><keycap>M</keycap><keycap>x</keycap></keycombo>if you want to run the command from the minibuffer.</para>
+    <para>Essentially all commands are accessible through the menu, and the most common commands are also accessible through keyboard shortcuts. The <guimenu>RefDB</guimenu> menu is subdivided into several sections. We'll discuss the sections in the order of appearance. Each description contains the synopsis of the refdb-mode command, i.e. what you'll have to type in after pressing <keycombo><keycap>M</keycap><keycap>x</keycap></keycombo> if you want to run the command from the minibuffer.</para>
     <sect1>
       <title>Managing references</title>
       <para>This section contains all commands that you need to manage references.</para>
@@ -290,6 +374,7 @@
 	    <void/>
 	  </funcprototype>
 	</funcsynopsis>
+	<para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>r</keycap><keycap>a</keycap></para>
 	<para>Adds the references in the current buffer to the currently selected database. If the buffer is a risx buffer, the whole contents of the buffer will be added to the database. If nxml-mode considers the buffer to be invalid, an error message is returned and no data are sent to the database</para>
 	<para>If the buffer is a RIS buffer and no region is selected, the whole buffer will be sent to the database. If a region is selected, only the references contained in the region will be sent to the database.</para>
       </sect2>
@@ -302,6 +387,7 @@
 	    <void/>
 	  </funcprototype>
 	</funcsynopsis>
+	<para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>r</keycap><keycap>u</keycap></para>
 	<para>Updates the references in the current buffer, i.e. existing references in the database are updated with the data of the current buffer. Works essentially like the <xref linkend="command-add-references"/> command.</para>
       </sect2>
       <sect2 id="command-delete-references" xreflabel="Delete References">
@@ -313,6 +399,7 @@
 	    <paramdef><parameter>idlist</parameter></paramdef>
 	  </funcprototype>
 	</funcsynopsis>
+	<para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>r</keycap><keycap>d</keycap></para>
 	<para>Asks interactively for a list of IDs to delete from the current database. The references will be permanently removed from the database.</para>
 	<note>
 	  <para>It is not possible to delete references that other users have added to their personal interest list. Use <xref linkend="command-dump-references"/> instead in this case</para>
@@ -330,6 +417,7 @@
 	      <paramdef><parameter>author</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>g</keycap><keycap>a</keycap></para>
 	  <para>Asks interactively for the name of an author. All references that contain this person as an author, as an editor, or as a series editor will be displayed. refdb-mode attempts an exact match of the value that you type in. Tab completion is available.</para>
 	</sect3>
 	<sect3 id="command-get-references-author-regexp" xreflabel="Author (regexp)">
@@ -341,6 +429,7 @@
 	      <paramdef><parameter>author</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>x</keycap><keycap>a</keycap></para>
 	  <para>Asks interactively for the name of an author as a regular expression. All references that contain this person as an author, as an editor, or as a series editor will be displayed. refdb-mode attempts a regular expression match of the value that you type in. Tab completion is available.</para>
 	</sect3>
 	<sect3 id="command-get-references-title" xreflabel="Title">
@@ -352,6 +441,7 @@
 	      <paramdef><parameter>title</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>g</keycap><keycap>t</keycap></para>
 	  <para>Asks interactively for the title of a reference. All references that use this string as a title, a book title, or a series title will be displayed. refdb-mode attempts an exact match of the value that you type in.</para>
 	</sect3>
 	<sect3 id="command-get-references-title-regexp" xreflabel="Title (regexp)">
@@ -363,6 +453,7 @@
 	      <paramdef><parameter>title</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>x</keycap><keycap>t</keycap></para>
 	  <para>Asks interactively for a title as a regular expression. All references that contain a matching string as a title, a book title, or a series title will be displayed. refdb-mode attempts a regular expression match of the value that you type in.</para>
 	</sect3>
 	<sect3 id="command-get-references-keyword" xreflabel="Keyword">
@@ -374,6 +465,7 @@
 	      <paramdef><parameter>keyword</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>g</keycap><keycap>k</keycap></para>
 	  <para>Asks interactively for a keyword. All references that contain this keyword will be displayed. refdb-mode attempts an exact match of the value that you type in. Tab completion is available.</para>
 	</sect3>
 	<sect3 id="command-get-references-keyword-regexp" xreflabel="Keyword (regexp)">
@@ -385,6 +477,7 @@
 	      <paramdef><parameter>keyword</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>x</keycap><keycap>k</keycap></para>
 	  <para>Asks interactively for a keyword as a regular expression. All references that contain this keyword will be displayed. refdb-mode attempts a regular expression match of the value that you type in. Tab completion is available.</para>
 	</sect3>
 	<sect3 id="command-get-references-periodical" xreflabel="Periodical">
@@ -396,6 +489,7 @@
 	      <paramdef><parameter>periodical</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>g</keycap><keycap>p</keycap></para>
 	  <para>Asks interactively for the name of a periodical. All references that were published in this periodical will be displayed. refdb-mode attempts an exact match of the value that you type in. Tab completion is available.</para>
 	</sect3>
 	<sect3 id="command-get-references-periodical-regexp" xreflabel="Periodical (regexp)">
@@ -407,6 +501,7 @@
 	      <paramdef><parameter>periodical</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>x</keycap><keycap>p</keycap></para>
 	  <para>Asks interactively for the name of a periodical as a regular expression. All references that were published in this periodical will be displayed. refdb-mode attempts a regular expression match of the value that you type in. Tab completion is available.</para>
 	</sect3>
 	<sect3 id="command-get-references-id" xreflabel="ID">
@@ -418,6 +513,7 @@
 	      <paramdef><parameter>id</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>g</keycap><keycap>i</keycap></para>
 	  <para>Asks interactively for the numerical ID of a reference which will be displayed. The ID is a unique identifier of each reference which is maintained by RefDB.</para>
 	</sect3>
 	<sect3 id="command-get-references-citationkey" xreflabel="Citation key">
@@ -429,6 +525,7 @@
 	      <paramdef><parameter>citekey</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>g</keycap><keycap>c</keycap></para>
 	  <para>Asks interactively for the alphanumeric citation key of a reference which will be displayed. The citation key is also an unique identifier which you can set when first adding a reference to the database.</para>
 	</sect3>
 	<sect3 id="command-get-references-advanced" xreflabel="Advanced Search">
@@ -440,7 +537,8 @@
 	      <paramdef><parameter>searchstring</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
-	  <para>Asks interactively for a complete query string. The syntax of <command>getref</command> queries is described in the <ulink url="http://refdb.sourceforge.net/manual/index.html">RefDB manual</ulink>. You may need to escape special characters in order to obtain a valid query string.</para>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>g</keycap><keycap>d</keycap></para>
+	  <para>Asks interactively for a complete query string. The syntax of <command>getref</command> queries is described in the <ulink url="http://refdb.sourceforge.net/manual/index.html">RefDB manual</ulink>. You may need to escape special characters to hide them from the Lisp interpreter in order to obtain a valid query string.</para>
 	</sect3>
       </sect2>
       <sect2 id="submenu-get-references-on-region" xreflabel="Get References on Region">
@@ -455,6 +553,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>g</keycap></keycombo><keycap>a</keycap></para>
 	  <para>Uses the selected region as the value of an author regular expression search. All references which contain the given person as an author, editor, or series editor will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-references-title-region" xreflabel="Title">
@@ -466,6 +565,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>g</keycap></keycombo><keycap>t</keycap></para>
 	  <para>Uses the selected region as the value of a title regular expression search. All references which contain a matching string in the title, the book title, or the series title will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-references-keyword-region" xreflabel="Keyword">
@@ -477,6 +577,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>g</keycap></keycombo><keycap>k</keycap></para>
 	  <para>Uses the selected region as the value of a keyword regular expression search. All references which contain a matching keyword will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-references-periodical-region" xreflabel="Periodical">
@@ -488,6 +589,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>g</keycap></keycombo><keycap>p</keycap></para>
 	  <para>Uses the selected region as the value of a periodical regular expression search. All references which were published in a matching periodical will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-references-id-region" xreflabel="ID">
@@ -499,6 +601,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>g</keycap></keycombo><keycap>i</keycap></para>
 	  <para>Uses the selected region as the value of an ID search. The reference with the given ID will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-references-citationkey-region" xreflabel="Citation Key">
@@ -510,6 +613,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>g</keycap></keycombo><keycap>c</keycap></para>
 	  <para>Uses the selected region as the value of a citation key search. The reference with the given citation key will be displayed.</para>
 	</sect3>
       </sect2>
@@ -522,6 +626,7 @@
 	    <void/>
 	  </funcprototype>
 	</funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo></para>
 	<para>Uses the citation around point to retrieve all cited references in that citation from the database.</para>
       </sect2>
       <sect2 id="command-pick-references" xreflabel="Pick References">
@@ -651,6 +756,7 @@
 	    <void/>
 	  </funcprototype>
 	</funcsynopsis>
+	<para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>n</keycap><keycap>a</keycap></para>
 	<para>Adds the extended notes in the current buffer to the currently selected database. If nxml-mode considers the buffer to be invalid, an error message is returned and no data are sent to the database</para>
       </sect2>
       <sect2 id="command-update-notes" xreflabel="Update Notes">
@@ -662,6 +768,7 @@
 	    <void/>
 	  </funcprototype>
 	</funcsynopsis>
+	<para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>n</keycap><keycap>u</keycap></para>
 	<para>Updates the extended notes in the current buffer, i.e. existing notes in the database are updated with the data of the current buffer. Works essentially like the <xref linkend="command-add-notes"/> command.</para>
       </sect2>
       <sect2 id="command-delete-notes" xreflabel="Delete Notes">
@@ -673,6 +780,7 @@
 	    <paramdef><parameter>idlist</parameter></paramdef>
 	  </funcprototype>
 	</funcsynopsis>
+	<para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>n</keycap><keycap>d</keycap></para>
 	<para>Asks interactively for a list of NIDs to delete from the current database. The notes will be permanently removed from the database.</para>
 	<note>
 	  <para>It is not possible to delete notes that you do not own.</para>
@@ -690,6 +798,7 @@
 	      <paramdef><parameter>title</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>o</keycap><keycap>t</keycap></para>
 	  <para>Asks interactively for the title of a reference. All references that use this string as a title will be displayed. refdb-mode attempts an exact match of the value that you type in.</para>
 	</sect3>
 	<sect3 id="command-get-notes-title-regexp" xreflabel="Title (regexp)">
@@ -701,6 +810,7 @@
 	      <paramdef><parameter>title</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>p</keycap><keycap>t</keycap></para>
 	  <para>Asks interactively for a title as a regular expression. All notes that contain a matching string as a title will be displayed. refdb-mode attempts a regular expression match of the value that you type in.</para>
 	</sect3>
 	<sect3 id="command-get-notes-keyword" xreflabel="Keyword">
@@ -712,6 +822,7 @@
 	      <paramdef><parameter>keyword</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>o</keycap><keycap>k</keycap></para>
 	  <para>Asks interactively for a keyword. All extended notes that contain this keyword will be displayed. refdb-mode attempts an exact match of the value that you type in. Tab completion is available.</para>
 	</sect3>
 	<sect3 id="command-get-notes-keyword-regexp" xreflabel="Keyword (regexp)">
@@ -723,6 +834,7 @@
 	      <paramdef><parameter>keyword</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>p</keycap><keycap>k</keycap></para>
 	  <para>Asks interactively for a keyword as a regular expression. All extended notes that contain this keyword will be displayed. refdb-mode attempts a regular expression match of the value that you type in. Tab completion is available.</para>
 	</sect3>
 	<sect3 id="command-get-notes-id" xreflabel="Note ID">
@@ -734,6 +846,7 @@
 	      <paramdef><parameter>id</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>o</keycap><keycap>i</keycap></para>
 	  <para>Asks interactively for the numerical ID of an extended note which will be displayed. The ID is a unique identifier of each note which is maintained by RefDB.</para>
 	</sect3>
 	<sect3 id="command-get-notes-citationkey" xreflabel="Citation key">
@@ -745,6 +858,7 @@
 	      <paramdef><parameter>citekey</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>o</keycap><keycap>c</keycap></para>
 	  <para>Asks interactively for the alphanumeric citation key of an extended note which will be displayed. The citation key is also an unique identifier which you can set when first adding a note to the database.</para>
 	</sect3>
 	<sect3 id="command-get-notes-linkedto-author" xreflabel="Linked to Author">
@@ -756,6 +870,7 @@
 	      <paramdef><parameter>author</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>o</keycap><keycap>a</keycap></para>
 	  <para>Asks interactively for the name of an author which will be used for an exact match. All notes which are linked to this author name will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-linkedto-author-regexp" xreflabel="Linked to Author (regexp)">
@@ -767,6 +882,7 @@
 	      <paramdef><parameter>author</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>p</keycap><keycap>a</keycap></para>
 	  <para>Asks interactively for the name of an author which will be used for a regexp match. All notes which are linked to this author name will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-linkedto-periodical" xreflabel="Linked to Periodical">
@@ -778,6 +894,7 @@
 	      <paramdef><parameter>periodical</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>o</keycap><keycap>p</keycap></para>
 	  <para>Asks interactively for the name of a periodical which will be used for an exact match. All notes which are linked to this periodical will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-linkedto-periodical-regexp" xreflabel="Linked to Periodical (regexp)">
@@ -789,6 +906,7 @@
 	      <paramdef><parameter>periodical</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>p</keycap><keycap>p</keycap></para>
 	  <para>Asks interactively for the name of a periodical which will be used for a regexp match. All notes which are linked to this periodical will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-linkedto-keyword" xreflabel="Linked to Keyword">
@@ -800,6 +918,7 @@
 	      <paramdef><parameter>keyword</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>o</keycap><keycap>l</keycap></para>
 	  <para>Asks interactively for a keyword which will be used for an exact match. All notes which are linked to this keyword will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-linkedto-keyword-regexp" xreflabel="Linked to Keyword (regexp)">
@@ -811,6 +930,7 @@
 	      <paramdef><parameter>keyword</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>p</keycap><keycap>l</keycap></para>
 	  <para>Asks interactively for a keyword which will be used for a regexp match. All notes which are linked to this keyword will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-linkedto-id" xreflabel="Linked to ID">
@@ -822,6 +942,7 @@
 	      <paramdef><parameter>id</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>o</keycap><keycap>q</keycap></para>
 	  <para>Asks interactively for the ID of a reference. All notes which are linked to this reference will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-linkedto-citekey" xreflabel="Linked to Citation Key">
@@ -833,6 +954,7 @@
 	      <paramdef><parameter>citekey</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>o</keycap><keycap>v</keycap></para>
 	  <para>Asks interactively for the citation key of a reference. All notes which are linked to this reference will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-advanced" xreflabel="Advanced Notes Search">
@@ -844,7 +966,8 @@
 	      <paramdef><parameter>searchstring</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
-	  <para>Asks interactively for a complete notes query string. The syntax of <command>getnote</command> queries is described in the <ulink url="http://refdb.sourceforge.net/manual/index.html">RefDB manual</ulink>. You may need to escape special characters in order to obtain a valid query string.</para>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>o</keycap><keycap>d</keycap></para>
+	  <para>Asks interactively for a complete notes query string. The syntax of <command>getnote</command> queries is described in the <ulink url="http://refdb.sourceforge.net/manual/index.html">RefDB manual</ulink>. You may need to escape special characters to hide them from the Lisp interpreter in order to obtain a valid query string.</para>
 	</sect3>
       </sect2>
       <sect2 id="submenu-get-notes-on-region" xreflabel="Get Notes on Region">
@@ -859,6 +982,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>o</keycap></keycombo><keycap>t</keycap></para>
 	  <para>Uses the selected region as the value of a title regular expression search. All notes which contain the given title will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-keyword-region" xreflabel="Keyword">
@@ -870,6 +994,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>o</keycap></keycombo><keycap>k</keycap></para>
 	  <para>Uses the selected region as the value of a keyword regular expression search. All notes which contain a matching keyword will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-authorlink-region" xreflabel="Linked to Author">
@@ -881,6 +1006,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>o</keycap></keycombo><keycap>a</keycap></para>
 	  <para>Uses the selected region as the value of an author name regular expression search. All notes which are linked to a matching person will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-keywordlink-region" xreflabel="Linked to Keyword">
@@ -892,6 +1018,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>o</keycap></keycombo><keycap>l</keycap></para>
 	  <para>Uses the selected region as the value of a keyword regular expression search. All notes which are linked to a matching keyword will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-periodicallink-region" xreflabel="Linked to Periodical">
@@ -903,6 +1030,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>o</keycap></keycombo><keycap>p</keycap></para>
 	  <para>Uses the selected region as the value of a periodical search. Notes which are linked to a matching periodical will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-idlink-region" xreflabel="Linked to ID">
@@ -914,6 +1042,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>o</keycap></keycombo><keycap>q</keycap></para>
 	  <para>Uses the selected region as the value of a reference ID search. Notes linked to the reference with the given ID will be displayed.</para>
 	</sect3>
 	<sect3 id="command-get-notes-citekeylink-region" xreflabel="Linked to Citation Key">
@@ -925,6 +1054,7 @@
 	      <void/>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>o</keycap></keycombo><keycap>v</keycap></para>
 	  <para>Uses the selected region as the value of a reference citation key search. Notes linked to the reference with the given citation key will be displayed.</para>
 	</sect3>
       </sect2>
@@ -965,6 +1095,7 @@
 	      <paramdef><parameter>outputtype</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>s</keycap><keycap>r</keycap></para>
 	  <para>Reference data can be retrieved in a variety of formats. If you use the menu command, a submenu with the available types will pop up. If you run the command in the minibuffer, please be aware that the argument is a symbol, not a string.</para>
 	  <note>
 	    <para>RIS and RISX are the most convenient types for working with references, as they can be updated in the database without further conversion. The other types are useful for exporting the data.</para>
@@ -979,6 +1110,7 @@
 	      <paramdef><parameter>outputtype</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>s</keycap><keycap>n</keycap></para>
 	  <para>Notes data can also be retrieved in several formats. If you use the menu command, a submenu with the available types will pop up. If you run the command in the minibuffer, please be aware that the argument is a symbol, not a string.</para>
 	  <note>
 	    <para>xnote is the only type suitable for working with notes, as they can be updated in the database without further conversion. The other types are useful for exporting the data.</para>
@@ -1038,6 +1170,7 @@
 	    <paramdef><parameter>database</parameter></paramdef>
 	  </funcprototype>
 	</funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>s</keycap><keycap>d</keycap></para>
 	<para>If used from the menu, this command will pop up a submenu with all databases that the current user has access to. The currently selected database is marked accordingly. Select one of the available databases to make it the active database.</para>
 	<para>If called interactively, this command will prompt the user with a completion list of available databases.</para>
       </sect2>
@@ -1079,6 +1212,7 @@
 		<void/>
 	      </funcprototype>
 	    </funcsynopsis>
+	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>d</keycap></para>
 	    <para>Creates a DocBook citation element from the reference (in RIS or RISX format) containing point and puts it into the kill ring.</para>
 	  </sect3>
 	  <sect3 id="command-create-tei-citation-from-point" xreflabel="Current as TEI">
@@ -1090,7 +1224,20 @@
 		<void/>
 	      </funcprototype>
 	    </funcsynopsis>
+	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>t</keycap></para>
 	    <para>Creates a TEI citation element from the reference (in RIS or RISX format) containing point and puts it into the kill ring.</para>
+	  </sect3>
+	  <sect3 id="command-create-latex-citation-from-point" xreflabel="Current as LaTeX">
+	    <title>Current as LaTeX</title>
+	    <indexterm><primary sortas="create-latex-citation-from-point">refdb-create-latex-citation-from-point</primary></indexterm>
+	    <funcsynopsis>
+	      <funcprototype>
+		<funcdef><function>refdb-create-latex-citation-from-point</function></funcdef>
+		<void/>
+	      </funcprototype>
+	    </funcsynopsis>
+	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>l</keycap></para>
+	    <para>Creates a LaTeX citation element from the reference (in RIS or RISX format) containing point and puts it into the kill ring.</para>
 	  </sect3>
 	  <sect3 id="command-create-docbook-citation-on-region" xreflabel="In Region as DocBook">
 	    <title>In Region as DocBook</title>
@@ -1101,20 +1248,34 @@
 		<void/>
 	      </funcprototype>
 	    </funcsynopsis>
+	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>s</keycap></para>
 	    <para>Creates a DocBook citation element from the references (in RIS or RISX format) contained in the current region and puts it into the kill ring.</para>
 	  </sect3>
 	  <sect3 id="command-create-tei-citation-on-region" xreflabel="In Region as TEI">
 	    <title>In Region as TEI</title>
-	    <indexterm><primary sortas="create-tei-citation-on-region">refdb-create-citation-on-region</primary></indexterm>
+	    <indexterm><primary sortas="create-tei-citation-on-region">refdb-create-tei-citation-on-region</primary></indexterm>
 	    <funcsynopsis>
 	      <funcprototype>
 		<funcdef><function>refdb-create-tei-citation-on-region</function></funcdef>
 		<void/>
 	      </funcprototype>
 	    </funcsynopsis>
+	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>r</keycap></para>
 	    <para>Creates a TEI citation element from the reference (in RIS or RISX format) contained in the current region and puts it into the kill ring.</para>
 	  </sect3>
-      </sect2>
+	  <sect3 id="command-create-latex-citation-on-region" xreflabel="In Region as LaTeX">
+	    <title>In Region as LaTeX</title>
+	    <indexterm><primary sortas="create-latex-citation-on-region">refdb-create-latex-citation-on-region</primary></indexterm>
+	    <funcsynopsis>
+	      <funcprototype>
+		<funcdef><function>refdb-create-latex-citation-on-region</function></funcdef>
+		<void/>
+	      </funcprototype>
+	    </funcsynopsis>
+	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>x</keycap></para>
+	    <para>Creates a LaTeX citation element from the reference (in RIS or RISX format) contained in the current region and puts it into the kill ring.</para>
+	  </sect3>
+	</sect2>
       <sect2 id="command-transform-document" xreflabel="Transform Document">
 	  <title>Transform Document</title>
 	  <indexterm><primary sortas="transform">refdb-transform</primary></indexterm>
@@ -1124,6 +1285,7 @@
 	      <paramdef><parameter>type</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>c</keycap></para>
 	  <para>Transforms the current document to an output format. If run from the menu, a submenu with the available targets will pop up. This command will run the appropriate Makefile target to achieve the transformation. Before the actual transformation takes place, the linkends will be normalized and the user is asked to save any changes.</para>
       </sect2>
       <sect2 id="command-view-output" xreflabel="View Output">
@@ -1135,6 +1297,7 @@
 	      <paramdef><parameter>type</parameter></paramdef>
 	    </funcprototype>
 	  </funcsynopsis>
+	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>v</keycap></para>
 	  <para>Runs an appropriate viewer for the output generated by <xref linkend="command-transform-document"/>. If run from the menu, a submenu with the available output types will pop up. The viewer will usually run in a separate window.</para>
       </sect2>
     </sect1>
