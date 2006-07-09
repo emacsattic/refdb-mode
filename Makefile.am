@@ -1,4 +1,3 @@
-## $Id: Makefile.am,v 1.7 2005/12/25 00:28:44 mhoenicka Exp $
 ## Process this file with automake to produce Makefile.in
 lisp_LISP = ris.el refdb-mode.el
 
@@ -9,12 +8,12 @@ doc_DATA = refdb-mode-manual.pdf refdb-mode-manual/*
 
 info_TEXINFOS = refdb-mode.texi
 
-EXTRA_DIST = $(lisp_LISP) $(doc_DATA) $(manual_DATA) refdb-mode-manual.xml refdb-mode.texi refdb-mode-config.el.in
+EXTRA_DIST = $(lisp_LISP) $(doc_DATA) $(manual_DATA) refdb-mode-manual.xml refdb-mode-manual-stripped.xml refdb-mode.texi refdb-mode-config.el.in autogen.sh manual-fo.xsl striptable.pl
 
 MAINTAINERCLEANFILES = $(doc_DATA) refdb-mode-manual.fo
 CLEANFILES = refdb-mode-config.el
 
-fosheet="http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl"
+fosheet="manual-fo.xsl"
 
 htmlsheet="http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl"
 
@@ -29,7 +28,7 @@ refdb-mode-config.el: refdb-mode-config.el.in
 	sed 's%<sysconfdir>%$(sysconfdir)%' > refdb-mode-config.el
 
 refdb-mode-manual.pdf: refdb-mode-manual.xml
-	xsltproc --stringparam funcsynopsis.style ansi $(fosheet) refdb-mode-manual.xml > refdb-mode-manual.fo
+	xsltproc --param fop.extensions 1 --stringparam funcsynopsis.style ansi $(fosheet) refdb-mode-manual.xml > refdb-mode-manual.fo
 	fop -fo refdb-mode-manual.fo -pdf refdb-mode-manual.pdf
 
 refdb-mode-manual/*: refdb-mode-manual.xml
@@ -38,7 +37,12 @@ refdb-mode-manual/*: refdb-mode-manual.xml
 	xsltproc --stringparam funcsynopsis.style ansi --stringparam html.stylesheet manual.css -o refdb-mode-manual/ $(htmlsheet) refdb-mode-manual.xml
 	cp manual.css refdb-mode-manual
 
-refdb-mode.texi: refdb-mode-manual.xml
-	docbook2texi refdb-mode-manual.xml
+# the stripped version of the manual is required because docbook2texi cannot
+# handle complex tables
+refdb-mode-manual-stripped.xml: refdb-mode-manual.xml
+	./striptable.pl < refdb-mode-manual.xml > refdb-mode-manual-stripped.xml
+
+refdb-mode.texi: refdb-mode-manual-stripped.xml
+	docbook2texi refdb-mode-manual-stripped.xml
 
 
