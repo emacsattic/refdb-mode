@@ -1,14 +1,10 @@
 ;;; refdb-mode.el --- Minor mode for RefDB interaction
-;; $Id: refdb-mode.el,v 1.28 2006/01/06 22:43:22 mhoenicka Exp $
 
-;; Copyright (C) 2005 Markus Hoenicka
+;; Copyright (C) 2005-2006 Markus Hoenicka
 
 ;; Authors: (-1.9)         Michael Smith <smith@sideshowbarker.net>
 ;;          (1.10-current) Markus Hoenicka <markus@mhoenicka.de>
 ;; Created: 2003-11-04
-;; Revision: $Revision: 1.28 $
-;; Date: $Date: 2006/01/06 22:43:22 $
-;; RCS Id: $Id: refdb-mode.el,v 1.28 2006/01/06 22:43:22 mhoenicka Exp $
 ;; X-URL: http://refdb.sf.net/
 ;; Keywords: xml docbook tei bibliography
 
@@ -347,6 +343,8 @@
 ;;   refdb-getref-by-title-regexp
 ;;   refdb-getref-by-keyword
 ;;   refdb-getref-by-keyword-regexp
+;;   refdb-getref-by-periodical
+;;   refdb-getref-by-periodical-regexp
 ;;   refdb-getref-by-id
 ;;   refdb-getref-by-citekey
 ;;   refdb-getref-by-advanced-search
@@ -1679,6 +1677,13 @@ Note that CITATIONFORMAT is a symbol, not a string."
   "RefDB cite point as TEI menu item."
   )
 
+(defvar refdb-create-latex-citation-from-point-menu-item
+  ["Current as LaTeX"
+   (refdb-create-latex-citation-from-point)
+   t]
+  "RefDB cite point as LaTeX menu item."
+  )
+
 (defvar refdb-create-docbook-citation-on-region-menu-item
   ["In Region as DocBook"
    (refdb-create-docbook-citation-on-region)
@@ -1691,6 +1696,13 @@ Note that CITATIONFORMAT is a symbol, not a string."
    (refdb-create-tei-citation-on-region)
    t]
   "RefDB cite range as TEI menu item."
+  )
+
+(defvar refdb-create-latex-citation-on-region-menu-item
+  ["In Region as LaTeX"
+   (refdb-create-latex-citation-on-region)
+   t]
+  "RefDB cite range as LaTeX menu item."
   )
 
 (defvar refdb-addnote-menu-item
@@ -3048,21 +3060,39 @@ You shouldn't call this function directly.  Instead call, e.g.,
   "Display all references cited in the citation containing Point."
   (interactive)
   (save-excursion
-    (let ((eoc (re-search-forward "</citation *>\\|</seg *>" nil t))
+    (let ((eoc (re-search-forward "</citation *>\\|</seg *>\\|}" nil t))
 	  (id-string))
-      (re-search-backward "<citation role=\"REFDB\" *>\\|<seg type=\"REFDBCITATION\".*>" nil t)
-      ;; in multiple citations the first linked is from the multiple definition but this doesn't hurt the query
-      (while (re-search-forward "\\(target\\|linkend\\)=\"ID\\([^-\"]+\\)" eoc t)
-	(let ((target (match-string 2 nil)))
-	  ;; see whether ID is a numeric ID or an alphanumeric CK
-	  (if (string-match "^[0-9]$" target)
-	      (setq id-string (concat id-string " OR :ID:=" target))
-	  (setq id-string (concat id-string " OR :CK:=" target)))
+      (if (null
+	   (string-match
+	    "sgml\\|xml"
+	    (downcase (symbol-name major-mode))))
+	  ; most likely a LaTeX document
+	  (progn
+	    (re-search-backward "{" nil t)
+	    (while (re-search-forward "\\([^{][^,}]+\\)[,\\|}]" eoc t)
+	      (let ((target (match-string 1 nil)))
+		(if (string-match "^[0-9]$" target)
+		    (setq id-string (concat id-string " OR :ID:=" target))
+		  (setq id-string (concat id-string " OR :CK:=" target)))
+		)
+	      )
+	    )
+	; else: SGML/XML document
+	(re-search-backward "<citation role=\"REFDB\" *>\\|<seg type=\"REFDBCITATION\".*>" nil t)
+	;; in multiple citations the first linkend is from the multiple definition but this doesn't hurt the query
+	(while (re-search-forward "\\(target\\|linkend\\)=\"ID\\([^-\"]+\\)" eoc t)
+	  (let ((target (match-string 2 nil)))
+	    ;; see whether ID is a numeric ID or an alphanumeric CK
+	    (if (string-match "^[0-9]$" target)
+		(setq id-string (concat id-string " OR :ID:=" target))
+	      (setq id-string (concat id-string " OR :CK:=" target)))
+	    )
 	  )
 	)
       (if (not (eq (length id-string) 0))
 	  ;; each cycle adds an " OR " at the beginning. We don't need the first one
 	  (refdb-getref-by-advanced-search (substring id-string 4))
+;	  (message id-string)
 	(error "No citation found in the source document"))
       )
     )
@@ -4261,12 +4291,12 @@ You shouldn't call this function directly.  Instead call, e.g.,
 on the references within the current region in a getref buffer."
   (let* ((my-id-string
 	 (if (eq major-mode 'ris-mode)
-	     (refdb-get-ris-idstring-from-region)
+	     (refdb-get-ris-idstring-from-region type)
 	   (if (or
 		(eq major-mode 'nxml-mode)
 		(eq major-mode 'xml-mode)
 		(eq major-mode 'sgml-mode))
-	       (refdb-get-risx-idstring-from-region)
+	       (refdb-get-risx-idstring-from-region type)
 	     nil
 	     ))
 	 )
@@ -4276,6 +4306,8 @@ on the references within the current region in a getref buffer."
 	    (format "<citation role=\"REFDB\">%s</citation>" my-id-string))
 	   ((eq type 'tei)
 	    (format "<seg type=\"REFDBCITATION\" part=\"N\" TEIform=\"seg\">%s</seg>" my-id-string))
+	   ((eq type 'latex)
+	    (format "\\cite{%s}" my-id-string))
 	   )
        )
     )
@@ -4299,7 +4331,16 @@ Use the entire buffer if mark is not set."
   (message "Added citations in range to the kill ring as TEI")
   )
 
-(defun refdb-get-ris-idstring-from-region ()
+(defun refdb-create-latex-citation-on-region ()
+  "Provide a LaTeX citation element in the kill ring based
+on the references within the current region in a getref buffer.
+Use the entire buffer if mark is not set."
+  (interactive)
+  (refdb-create-citation-on-region 'latex)
+  (message "Added citations in range to the kill ring as LaTeX")
+  )
+
+(defun refdb-get-ris-idstring-from-region (type)
   "Scan the currently selected region for RIS ID elements and return their
 values as a list of strings. Use the entire buffer if mark is not set."
   (save-excursion
@@ -4317,26 +4358,32 @@ values as a list of strings. Use the entire buffer if mark is not set."
 	    (re-search-backward "^TY  - " nil t))
 	(goto-char (point-min)))
       (while (re-search-forward "^ID  - \\(.*\\)$" region-extended-end t)
-	(if (eq refdb-citation-type 'short)
-	    (setq id-string (concat id-string ";" (match-string 1 nil)))
-	  ;; the xref notation must be adapted to SGML and XML
-	  (setq id-string (concat id-string 
-				  (format
-				   (if (eq refdb-citation-format 'xml)
-				       "<xref linkend=\"ID%s-X\"/>"
-				     "<xref linkend=\"ID%s-X\">")
-				   (match-string 1 nil))
-				  ))
+	(if (eq type 'latex)
+	    (setq id-string (concat id-string "," (match-string 1 nil)))
+	  (if (eq refdb-citation-type 'short)
+	      (setq id-string (concat id-string ";" (match-string 1 nil)))
+	    ;; the xref notation must be adapted to SGML and XML
+	    (setq id-string (concat id-string 
+				    (format
+				     (if (eq refdb-citation-format 'xml)
+					 "<xref linkend=\"ID%s-X\"/>"
+				       "<xref linkend=\"ID%s-X\">")
+				     (match-string 1 nil))
+				    ))
+	    )
 	  )
 	)
-      ;; remove leading semicolon in short type strings
+      ;; remove leading separator in short type strings and LaTeX strings
       ;; add multixref element in full type strings
       (cond ((and
-	      (eq refdb-citation-type 'short)
+	      (or
+	       (eq refdb-citation-type 'short)
+	       (eq type 'latex))
 	      (not (string= id-string "")))
 	     (substring id-string 1))
 	    ((and
 	      (eq refdb-citation-type 'full)
+	      (not (eq type 'latex))
 	      (not (string= id-string "")))
 	     (let ((linkend
 		    (progn
@@ -4359,7 +4406,7 @@ values as a list of strings. Use the entire buffer if mark is not set."
     )
   )
 
-(defun refdb-get-risx-idstring-from-region ()
+(defun refdb-get-risx-idstring-from-region (type)
   "Scan the currently selected region for RIS ID elements and return their
 values as a list of strings."
   (save-excursion
@@ -4377,15 +4424,32 @@ values as a list of strings."
 	    (re-search-backward "<entry" nil t))
 	(goto-char (point-min)))
       (while (re-search-forward "citekey=\"\\([^\"]*\\)\"" region-extended-end t)
-	(setq id-string (concat id-string ";" (match-string 1 nil))))
+	(if (eq type 'latex)
+	    (setq id-string (concat id-string "," (match-string 1 nil)))
+	  (if (eq refdb-citation-type 'short)
+	      (setq id-string (concat id-string ";" (match-string 1 nil)))
+	    ;; the xref notation must be adapted to SGML and XML
+	    (setq id-string (concat id-string 
+				    (format
+				     (if (eq refdb-citation-format 'xml)
+					 "<xref linkend=\"ID%s-X\"/>"
+				       "<xref linkend=\"ID%s-X\">")
+				     (match-string 1 nil))
+				    ))
+	    )
+	  )
+	)
       ;; remove leading semicolon in short type strings
       ;; add multixref element in full type strings
       (cond ((and
-	      (eq refdb-citation-type 'short)
+	      (or
+	       (eq refdb-citation-type 'short)
+	       (eq type 'latex))
 	      (not (string= id-string "")))
 	     (substring id-string 1))
 	    ((and
 	      (eq refdb-citation-type 'full)
+	      (not (eq type 'latex))
 	      (not (string= id-string "")))
 	     (let ((linkend
 		    (progn
@@ -4412,12 +4476,12 @@ values as a list of strings."
 on the reference where point is currently located in a getref buffer."
   (let ((my-id
 	 (if (eq major-mode 'ris-mode)
-	     (refdb-get-ris-id-from-point)
+	     (refdb-get-ris-id-from-point type)
 	   (if (or
 		(eq major-mode 'nxml-mode)
 		(eq major-mode 'xml-mode)
 		(eq major-mode 'sgml-mode))
-	       (refdb-get-risx-id-from-point)
+	       (refdb-get-risx-id-from-point type)
 	     nil
 	     ))
 	 ))
@@ -4426,6 +4490,8 @@ on the reference where point is currently located in a getref buffer."
 	    (format "<citation role=\"REFDB\">%s</citation>" my-id))
 	   ((eq type 'tei)
 	    (format "<seg type=\"REFDBCITATION\" part=\"N\" TEIform=\"seg\">%s</seg>" my-id))
+	   ((eq type 'latex)
+	    (format "\\cite{%s}" my-id))
 	   )
      )
     )
@@ -4447,13 +4513,23 @@ on the reference where point is currently located in a getref buffer."
   (message "Added citation from point to the kill ring as TEI")
   )
 
-(defun refdb-get-ris-id-from-point ()
+(defun refdb-create-latex-citation-from-point ()
+  "Provide a LaTeX citation element in the kill ring based
+on the reference where point is currently located in a getref buffer."
+  (interactive)
+  (refdb-create-citation-from-point 'latex)
+  (message "Added citation from point to the kill ring as LaTeX")
+  )
+
+(defun refdb-get-ris-id-from-point (type)
   "Search for the ID of the current reference in a RIS buffer."
   (save-excursion
     (let ((eor (re-search-forward "^ER  - $" nil t)))
       (re-search-backward "^TY  - " nil t)
       (if (re-search-forward "^ID  - \\(.*\\)$" eor t)
-	  (if (eq refdb-citation-type 'short)
+	  (if (or
+	       (eq refdb-citation-type 'short)
+	       (eq type 'latex))
 	      (match-string 1 nil)
 	    ;; the xref notation used here works for both SGML and XML
 	    (format
@@ -4466,13 +4542,15 @@ on the reference where point is currently located in a getref buffer."
     )
   )
 
-(defun refdb-get-risx-id-from-point ()
+(defun refdb-get-risx-id-from-point (type)
   "Search for the ID of the current reference in a risx buffer."
   (save-excursion
     (let ((eor (re-search-forward "</entry *>" nil t)))
       (re-search-backward "<entry" nil t)
       (if (re-search-forward "citekey=\"\\(.*\\)\"" eor t)
-	  (if (eq refdb-citation-type 'short)
+	  (if (or
+	       (eq refdb-citation-type 'short)
+	       (eq type 'latex))
 	      (match-string 1 nil)
 	    ;; the xref notation used here works for both SGML and XML
 	    (format
@@ -6206,8 +6284,75 @@ You shouldn't call this function directly.  Instead call, e.g.,
  nil
  ;; No indicator for the mode line.
  nil
- ;; Make empty default keymap;
- '( ("" . nil)))
+ ;; Define a keymap. \C-c\C-r is the common prefix for all commands
+ '( ("\C-c\C-rv" . refdb-show-version)
+; reference management: r
+    ("\C-c\C-rra" . refdb-addref-on-region)
+    ("\C-c\C-rru" . refdb-updateref-on-region)
+    ("\C-c\C-rrd" . refdb-deleteref)
+; notes management: n
+    ("\C-c\C-rna" . refdb-addnote-on-buffer)
+    ("\C-c\C-rnu" . refdb-updatenote-on-buffer)
+    ("\C-c\C-rnd" . refdb-deletenote)
+; get references: g: exact match x: regexp match
+    ("\C-c\C-rga" . refdb-getref-by-author)
+    ("\C-c\C-rxa" . refdb-getref-by-author-regexp)
+    ("\C-c\C-rgt" . refdb-getref-by-title)
+    ("\C-c\C-rxt" . refdb-getref-by-title-regexp)
+    ("\C-c\C-rgk" . refdb-getref-by-keyword)
+    ("\C-c\C-rxk" . refdb-getref-by-keyword-regexp)
+    ("\C-c\C-rgp" . refdb-getref-by-periodical)
+    ("\C-c\C-rxp" . refdb-getref-by-periodical-regexp)
+    ("\C-c\C-rgi" . refdb-getref-by-id)
+    ("\C-c\C-rgc" . refdb-getref-by-citekey)
+    ("\C-c\C-rgd" . refdb-getref-by-advanced-search)
+; get references on region: \C-g
+    ("\C-c\C-r\C-ga" . refdb-getref-by-author-on-region)
+    ("\C-c\C-r\C-gt" . refdb-getref-by-title-on-region)
+    ("\C-c\C-r\C-gk" . refdb-getref-by-keyword-on-region)
+    ("\C-c\C-r\C-gp" . refdb-getref-by-periodical-on-region)
+    ("\C-c\C-r\C-gi" . refdb-getref-by-id-on-region)
+    ("\C-c\C-r\C-gc" . refdb-getref-by-citekey-on-region)
+; get references from citation: \C-c
+    ("\C-c\C-r\C-c" . refdb-getref-from-citation)
+; get notes: o: exact match p: regexp match
+    ("\C-c\C-rot" . refdb-getnote-by-title)
+    ("\C-c\C-rpt" . refdb-getnote-by-title-regexp)
+    ("\C-c\C-rok" . refdb-getnote-by-keyword)
+    ("\C-c\C-rpk" . refdb-getnote-by-keyword-regexp)
+    ("\C-c\C-roi" . refdb-getnote-by-nid)
+    ("\C-c\C-roc" . refdb-getnote-by-ncitekey)
+    ("\C-c\C-roa" . refdb-getnote-by-authorlink)
+    ("\C-c\C-rpa" . refdb-getnote-by-authorlink-regexp)
+    ("\C-c\C-rop" . refdb-getnote-by-periodicallink)
+    ("\C-c\C-rpp" . refdb-getnote-by-periodicallink-regexp)
+    ("\C-c\C-rol" . refdb-getnote-by-keywordlink)
+    ("\C-c\C-rpl" . refdb-getnote-by-keywordlink-regexp)
+    ("\C-c\C-roq" . refdb-getnote-by-idlink)
+    ("\C-c\C-rov" . refdb-getnote-by-citekeylink)
+    ("\C-c\C-rod" . refdb-getnote-by-advanced-search)
+; get notes on region: \C-o
+    ("\C-c\C-r\C-ot" . refdb-getnote-by-title-on-region)
+    ("\C-c\C-r\C-ok" . refdb-getnote-by-keyword-on-region)
+    ("\C-c\C-r\C-oa" . refdb-getnote-by-authorlink-on-region)
+    ("\C-c\C-r\C-op" . refdb-getnote-by-periodicallink-on-region)
+    ("\C-c\C-r\C-ol" . refdb-getnote-by-keywordlink-on-region)
+    ("\C-c\C-r\C-oq" . refdb-getnote-by-idlink-on-region)
+    ("\C-c\C-r\C-ov" . refdb-getnote-by-citekeylink-on-region)
+; select: s
+    ("\C-c\C-rsd" . refdb-select-database)
+    ("\C-c\C-rsr" . refdb-select-data-output-type)
+    ("\C-c\C-rsn" . refdb-select-notesdata-output-type)
+; transform: c
+    ("\C-c\C-rcc" . refdb-transform)
+    ("\C-c\C-rcv" . refdb-view-output)
+    ("\C-c\C-rcs" . refdb-create-docbook-citation-on-region)
+    ("\C-c\C-rcr" . refdb-create-tei-citation-on-region)
+    ("\C-c\C-rcx" . refdb-create-latex-citation-on-region)
+    ("\C-c\C-rcd" . refdb-create-docbook-citation-from-point)
+    ("\C-c\C-rct" . refdb-create-tei-citation-from-point)
+    ("\C-c\C-rcl" . refdb-create-latex-citation-from-point)
+    ))
 
 (defvar refdb-menu-item-separator1
   ["--" t]
@@ -6647,9 +6792,11 @@ Customize this to add/remove/rearrange submenus."
   '(
     refdb-create-docbook-citation-from-point-menu-item
     refdb-create-tei-citation-from-point-menu-item
+    refdb-create-latex-citation-from-point-menu-item
     refdb-menu-item-separator4
     refdb-create-docbook-citation-on-region-menu-item
     refdb-create-tei-citation-on-region-menu-item
+    refdb-create-latex-citation-on-region-menu-item
     )
   "*Contents of 'Cite References' submenu for RefDB mode.
 Customize this to add/remove/rearrange submenus."
