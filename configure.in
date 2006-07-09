@@ -3,7 +3,7 @@ dnl $Id: configure.in,v 1.7 2005/12/25 00:27:49 mhoenicka Exp $
 
 dnl check for one of the source files
 AC_INIT(refdb-mode.el)
-AM_INIT_AUTOMAKE(refdb-elisp, 1.2)
+AM_INIT_AUTOMAKE(refdb-elisp, 1.3)
 
 dnl find Emacs and set site-lisp path
 AM_PATH_LISPDIR
@@ -20,7 +20,7 @@ AC_PATH_PROG(mysudo, sudo, sudo)
 AC_PATH_PROGS(mygnumake, gmake make, make)
 AC_PATH_PROGS(mypdfviewer, acroread xpdf gv kpdf gpdf gnome-gv kghostview evince Preview AcroRd32, gv, [$PATH:/opt/csw/bin:/Applications/Preview.app/Contents/MacOS])
 AC_PATH_PROGS(mypsviewer, gv kghostview gnome-gv ggv bmv gsview32 Preview, gv, [$PATH:/opt/csw/bin:/Applications/Preview.app/Contents/MacOS])
-AC_PATH_PROGS(myrtfviewer, soffice oowriter abiword ted Ted kword TextEdit openoffice.org-2.0.0 openoffice.org-1.1.4 write, soffice, [$PATH:/opt/csw/bin:/Applications/TextEdit.app/Contents/MacOS])
+AC_PATH_PROGS(myrtfviewer, openoffice.org abiword ted Ted kword TextEdit soffice oowriter openoffice.org-2.0.0 openoffice.org-1.1.4 write, openoffice.org, [$PATH:/opt/csw/bin:/Applications/TextEdit.app/Contents/MacOS])
 AC_PATH_PROGS(myshell, sh ash bash, sh)
 
 AC_SUBST(lispdir)
