@@ -10,7 +10,7 @@ info_TEXINFOS = refdb-mode.texi
 
 EXTRA_DIST = $(lisp_LISP) $(doc_DATA) $(manual_DATA) refdb-mode-manual.xml refdb-mode-manual-stripped.xml refdb-mode.texi refdb-mode-config.el.in autogen.sh manual-fo.xsl striptable.pl
 
-MAINTAINERCLEANFILES = $(doc_DATA) refdb-mode-manual.fo
+MAINTAINERCLEANFILES = $(doc_DATA) refdb-mode-manual.fo refdb-mode-manual-stripped.xml refdb-mode.texi
 CLEANFILES = refdb-mode-config.el
 
 fosheet="manual-fo.xsl"
@@ -43,6 +43,6 @@ refdb-mode-manual-stripped.xml: refdb-mode-manual.xml
 	./striptable.pl < refdb-mode-manual.xml > refdb-mode-manual-stripped.xml
 
 refdb-mode.texi: refdb-mode-manual-stripped.xml
-	docbook2texi refdb-mode-manual-stripped.xml
+	@mydb2texi@ --to-stdout refdb-mode-manual-stripped.xml > $@
 
 

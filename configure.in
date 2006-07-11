@@ -22,6 +22,7 @@ AC_PATH_PROGS(mypdfviewer, acroread xpdf gv kpdf gpdf gnome-gv kghostview evince
 AC_PATH_PROGS(mypsviewer, gv kghostview gnome-gv ggv bmv gsview32 Preview, gv, [$PATH:/opt/csw/bin:/Applications/Preview.app/Contents/MacOS])
 AC_PATH_PROGS(myrtfviewer, openoffice.org abiword ted Ted kword TextEdit soffice oowriter openoffice.org-2.0.0 openoffice.org-1.1.4 write, openoffice.org, [$PATH:/opt/csw/bin:/Applications/TextEdit.app/Contents/MacOS])
 AC_PATH_PROGS(myshell, sh ash bash, sh)
+AC_PATH_PROGS(mydb2texi, docbook2texi docbook2x-texi, docbook2texi)
 
 AC_SUBST(lispdir)
 AC_SUBST(mysudo)
@@ -35,6 +36,7 @@ AC_SUBST(mypdfviewer)
 AC_SUBST(mypsviewer)
 AC_SUBST(myrtfviewer)
 AC_SUBST(myshell)
+AC_SUBST(mydb2texi)
 
 AC_OUTPUT(Makefile)
 
