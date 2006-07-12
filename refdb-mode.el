@@ -1663,6 +1663,27 @@ Note that CITATIONFORMAT is a symbol, not a string."
   "RefDB menu item for removing references from the personal reference list."
   )
 
+(defvar refdb-insert-author-menu-item
+  ["Author"
+   (call-interactively 'refdb-insert-author)
+   t]
+  "RefDB insert-author menu item."
+  )
+
+(defvar refdb-insert-keyword-menu-item
+  ["Keyword"
+   (call-interactively 'refdb-insert-keyword)
+   t]
+  "RefDB insert-keyword menu item."
+  )
+
+(defvar refdb-insert-periodical-menu-item
+  ["Periodical"
+   (call-interactively 'refdb-insert-periodical)
+   t]
+  "RefDB insert-periodical menu item."
+  )
+
 (defvar refdb-create-docbook-citation-from-point-menu-item
   ["Current as DocBook"
    (refdb-create-docbook-citation-from-point)
@@ -3881,8 +3902,8 @@ You shouldn't call this function directly.  Instead call, e.g.,
 	(shell-command
 	 (format
 	  "%s %s -C addlink -d %s %s %s %s "
-	  refdb-refdba-program
-	  refdb-refdba-options
+	  refdb-refdbc-program
+	  refdb-refdbc-options
 	  refdb-database
 	  note-specifier
 	  note-value
@@ -3898,8 +3919,8 @@ You shouldn't call this function directly.  Instead call, e.g.,
     (message
      (format
       "Displaying output for '%s %s -C addlink -d %s %s %s %s'...done"
-      refdb-refdba-program
-      refdb-refdba-options
+      refdb-refdbc-program
+      refdb-refdbc-options
       note-specifier
       note-value
       link-to
@@ -3937,8 +3958,8 @@ You shouldn't call this function directly.  Instead call, e.g.,
 	(shell-command
 	 (format
 	  "%s %s -C deletelink -d %s %s %s %s "
-	  refdb-refdba-program
-	  refdb-refdba-options
+	  refdb-refdbc-program
+	  refdb-refdbc-options
 	  refdb-database
 	  note-specifier
 	  note-value
@@ -3954,8 +3975,8 @@ You shouldn't call this function directly.  Instead call, e.g.,
     (message
      (format
       "Displaying output for '%s %s -C deletelink -d %s %s %s %s'...done"
-      refdb-refdba-program
-      refdb-refdba-options
+      refdb-refdbc-program
+      refdb-refdbc-options
       note-specifier
       note-value
       link-to
@@ -4013,6 +4034,36 @@ You shouldn't call this function directly.  Instead call, e.g.,
     (refdb-output-mode))
   (setq resize-mini-windows resize-mini-windows-default)
   )
+
+(defun refdb-insert-author (author)
+  "Insert an author name at point"
+  (interactive (list
+		(completing-read "Author: " 
+				 (refdb-make-alist-from-list refdb-current-authors-list))
+		)
+	       )
+  (insert author)
+)
+
+(defun refdb-insert-keyword (keyword)
+  "Insert a keyword at point"
+  (interactive (list
+		(completing-read "Keyword: " 
+				 (refdb-make-alist-from-list refdb-current-keywords-list))
+		)
+	       )
+  (insert keyword)
+)
+
+(defun refdb-insert-periodical (periodical)
+  "Insert a periodical name at point"
+  (interactive (list
+		(completing-read "Periodical: " 
+				 (refdb-make-alist-from-list refdb-current-periodicals-list))
+		)
+	       )
+  (insert periodical)
+)
 
 (defun refdb-create-document (type)
   "Create a new RefDB document with type TYPE."
@@ -6339,6 +6390,10 @@ You shouldn't call this function directly.  Instead call, e.g.,
     ("\C-c\C-r\C-ol" . refdb-getnote-by-keywordlink-on-region)
     ("\C-c\C-r\C-oq" . refdb-getnote-by-idlink-on-region)
     ("\C-c\C-r\C-ov" . refdb-getnote-by-citekeylink-on-region)
+; insert: i
+    ("\C-c\C-ria" . refdb-insert-author)
+    ("\C-c\C-rik" . refdb-insert-keyword)
+    ("\C-c\C-rip" . refdb-insert-periodical)
 ; select: s
     ("\C-c\C-rsd" . refdb-select-database)
     ("\C-c\C-rsr" . refdb-select-data-output-type)
@@ -6711,6 +6766,27 @@ Customize this to add/remove/rearrange submenus."
   :type '(repeat variable)
   )
 
+(defcustom refdb-insert-submenu-contents
+  '(
+    refdb-insert-author-menu-item
+    refdb-insert-keyword-menu-item
+    refdb-insert-periodical-menu-item
+    )
+  "*Contents of 'Insert' submenu for RefDB mode.
+Customize this to add/remove/rearrange submenus."
+  :set (lambda (sym val)
+	 (setq refdb-insert-submenu-contents val)
+	 (setq refdb-insert-submenu-definition
+	       (cons "Insert"
+		     ;; turn quoted contents value back into a real list
+		     (mapcar (lambda (item) (if (symbolp item) (eval item) item)) val)
+		     )
+	       )
+	 )
+  :group 'refdb-menu-definitions
+  :type '(repeat variable)
+  )
+
 (defcustom refdb-administration-submenu-contents
   '(
     refdb-createdb-menu-item
@@ -6907,6 +6983,8 @@ Customize this to add/remove/rearrange submenus."
     refdb-getnote-on-region-submenu-definition
     refdb-addlink-menu-item
     refdb-deletelink-menu-item
+    refdb-menu-item-separator4
+    refdb-insert-submenu-definition
     refdb-menu-item-separator4
     refdb-data-output-submenu-definition
     refdb-selectdb-submenu-contents

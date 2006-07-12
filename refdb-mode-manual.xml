@@ -219,7 +219,7 @@
     </sect1>
     <sect1>
       <title>Key bindings</title>
-      <para>The most common refdb-mode commands are accessible through keyboard shortcuts. The common prefix of these commands is <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo>. The remainder of the key sequences are grouped by the purpose of the commands in a similar fashion as in the menu. Reference and notes management functions use <keycap>r</keycap> and <keycap>n</keycap> as a prefix, respectively. Commands that retrieve references by exact match and by regexp match use <keycap>g</keycap> and <keycap>x</keycap> as a prefix, respectively. The corresponding prefixes for notes management are <keycap>o</keycap> and <keycap>p</keycap>. Retrieving references and notes on region requires the <keycombo><keycap>Ctrl</keycap><keycap>g</keycap></keycombo> and <keycombo><keycap>Ctrl</keycap><keycap>o</keycap></keycombo> prefixes. Select commands use the <keycap>s</keycap> prefix, and commands related to transforming documents and citing references use <keycap>c</keycap> as a prefix.</para>
+      <para>The most common refdb-mode commands are accessible through keyboard shortcuts. The common prefix of these commands is <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo>. The remainder of the key sequences are grouped by the purpose of the commands in a similar fashion as in the menu. Reference and notes management functions use <keycap>r</keycap> and <keycap>n</keycap> as a prefix, respectively. Commands that retrieve references by exact match and by regexp match use <keycap>g</keycap> and <keycap>x</keycap> as a prefix, respectively. The corresponding prefixes for notes management are <keycap>o</keycap> and <keycap>p</keycap>. Retrieving references and notes on region requires the <keycombo><keycap>Ctrl</keycap><keycap>g</keycap></keycombo> and <keycombo><keycap>Ctrl</keycap><keycap>o</keycap></keycombo> prefixes. Insert commands use the <keycap>i</keycap> prefix, select commands use the <keycap>s</keycap> prefix, and commands related to transforming documents and citing references use <keycap>c</keycap> as a prefix.</para>
       <table frame="all">
 	<title>refdb-mode key bindings</title>
 	<tgroup cols="3" align="left" colsep="1" rowsep="1">
@@ -267,6 +267,17 @@
 		<para>keywordlink: <keycap>l</keycap></para>
 		<para>IDlink: <keycap>q</keycap></para>
 		<para>citation key link: <keycap>v</keycap></para>
+	      </entry>
+	    </row>
+	    <row>
+	      <entry><para><keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo></para></entry>
+	      <entry>
+		<para>insert: <keycap>i</keycap></para>
+	      </entry>
+	      <entry>
+		<para>author: <keycap>a</keycap></para>
+		<para>keyword: <keycap>k</keycap></para>
+		<para>periodical: <keycap>p</keycap></para>
 	      </entry>
 	    </row>
 	    <row>
@@ -971,7 +982,7 @@
 	</sect3>
       </sect2>
       <sect2 id="submenu-get-notes-on-region" xreflabel="Get Notes on Region">
-	<title>Get References on Region submenu</title>
+	<title>Get Notes on Region submenu</title>
 	<para>The commands of this submenu do not ask for a value to search for, but work on a region that you have selected in the current buffer, either by mouse or by setting mark and point appropriately. The contents of the region will be used as the value of your query.</para>
 	<sect3 id="command-get-notes-title-region" xreflabel="Title">
 	  <title>Title</title>
@@ -1079,6 +1090,49 @@
 	  </funcprototype>
 	</funcsynopsis>
 	<para>Asks interactively for the ID of an extended note, and for a list of items to be unlinked. Matching links will be deleted from the note.</para>
+      </sect2>
+    </sect1>
+    <sect1>
+      <title>Insert commands</title>
+      <sect2 id="submenu-insert" xreflabel="Insert">
+	<title>Insert submenu</title>
+	<para>This submenu contains commands to insert strings based on the completion lists for author names, keywords, and periodicals.</para>
+	<sect3 id="command-insert-author" xreflabel="Insert Author">
+	  <title>Insert Author</title>
+	  <indexterm><primary sortas="insert-author">refdb-insert-author</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-insert-author</function></funcdef>
+	      <paramdef><parameter>author</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>i</keycap><keycap>a</keycap></para>
+	  <para>Prompts for the name of an author. You can use minibuffer completion to select from the list of author names in the current database, or type in a new name.</para>
+	</sect3>
+	<sect3 id="command-insert-keyword" xreflabel="Insert Keyword">
+	  <title>Insert Keyword</title>
+	  <indexterm><primary sortas="insert-keyword">refdb-insert-keyword</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-insert-keyword</function></funcdef>
+	      <paramdef><parameter>keyword</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>i</keycap><keycap>k</keycap></para>
+	  <para>Prompts for a keyword. You can use minibuffer completion to select from the list of keywords in the current database, or type in a new keyword.</para>
+	</sect3>
+	<sect3 id="command-insert-periodical" xreflabel="Insert Periodical">
+	  <title>Insert Periodical</title>
+	  <indexterm><primary sortas="insert-periodical">refdb-insert-periodical</primary></indexterm>
+	  <funcsynopsis>
+	    <funcprototype>
+	      <funcdef><function>refdb-insert-periodical</function></funcdef>
+	      <paramdef><parameter>periodical</parameter></paramdef>
+	    </funcprototype>
+	  </funcsynopsis>
+	  <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>i</keycap><keycap>p</keycap></para>
+	  <para>Prompts for the name of a periodical. You can use minibuffer completion to select from the list of periodical names in the current database, or type in a new name.</para>
+	</sect3>
       </sect2>
     </sect1>
     <sect1>
