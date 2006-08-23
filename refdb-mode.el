@@ -2987,12 +2987,12 @@ You shouldn't call this function directly.  Instead call, e.g.,
 	   (upcase (symbol-name refdb-data-output-format))
 	   )
 	 ))
-    (message (format "Getting datasets for search string %s ..." searchstring))
+    (message (format "Getting datasets for search string \"%s\" ..." searchstring))
     (if (not (eq (length refdb-database) 0))
 	(progn
 	  (shell-command
 	   (format
-	    "%s %s -C getref %s %s -d %s -t %s -s %s"
+	    "%s %s -C getref \"%s\" %s -d %s -t %s -s %s"
 	    refdb-refdbc-program
 	    refdb-refdbc-options
 	    searchstring
@@ -3013,7 +3013,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
       )
     (message
      (format
-      "Displaying output for '%s %s -C getref %s %s -d %s -t %s -s %s'...done"
+      "Displaying output for '%s %s -C getref \"%s\" %s -d %s -t %s -s %s'...done"
       refdb-refdbc-program
       refdb-refdbc-options
       searchstring
@@ -3777,12 +3777,12 @@ You shouldn't call this function directly.  Instead call, e.g.,
 	   (upcase (symbol-name refdb-data-output-format))
 	   )
 	 ))
-    (message (format "Getting notes for search string %s ..." searchstring))
+    (message (format "Getting notes for search string \"%s\" ..." searchstring))
     (if (not (eq (length refdb-database) 0))
 	(progn
 	  (shell-command
 	   (format
-	    "%s %s -C getnote %s %s -d %s -t %s -s %s"
+	    "%s %s -C getnote \"%s\" %s -d %s -t %s -s %s"
 	    refdb-refdbc-program
 	    refdb-refdbc-options
 	    searchstring
@@ -3803,7 +3803,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
       )
     (message
      (format
-      "Displaying output for '%s %s -C getnote %s %s -d %s -t %s -s %s'...done"
+      "Displaying output for '%s %s -C getnote \"%s\" %s -d %s -t %s -s %s'...done"
       refdb-refdbc-program
       refdb-refdbc-options
       searchstring
