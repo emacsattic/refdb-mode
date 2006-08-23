@@ -3158,7 +3158,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
     (pop-to-buffer "*refdb-messages*")
     (pop-to-buffer "*refdb-output*")
     )
-  (refdb-output-buffer-mode)
+  (refdb-output-mode)
   (setq resize-mini-windows resize-mini-windows-default)
   )
 
@@ -3201,7 +3201,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
     (pop-to-buffer "*refdb-messages*")
     (pop-to-buffer "*refdb-output*")
     )
-  (refdb-output-buffer-mode)
+  (refdb-output-mode)
   (setq resize-mini-windows resize-mini-windows-default)
   )
 
