@@ -48,3 +48,6 @@
 (setq refdb-rtf-view-program "<myrtfviewer>")
 (setq refdb-external-program-shell "<myshell>")
 (setq refdb-sysconfdir "<sysconfdir>/refdb")
+
+;; the version string, as filled in by the autotools
+(setq refdb-mode-version "<version>")

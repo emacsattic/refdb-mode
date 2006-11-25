@@ -38,7 +38,7 @@
 ;; -------------------------------------------------------------------
 ;;; Compatibility
 ;; -------------------------------------------------------------------
-;; `refdb-mode' requires RefDB version 0.9.6 or later.  It has been
+;; `refdb-mode' requires RefDB version 0.9.8 or later.  It has been
 ;; tested and found to work with the Linux, FreeBSD, Cygwin/X-Windows,
 ;; and Win32-native "NTEmacs" versions of GNU Emacs 21.3 (the shell
 ;; commands work best in the latter if you use Cygwin bash)
@@ -184,13 +184,13 @@
 ;;
 ;;   Add References
 ;;   Update References
+;;   Check References
 ;;   Delete References
 ;;   Get References >
 ;;   Get References on Region >
 ;;   Pick References
 ;;   Dump References
 ;;   Convert References >
-;;   Cite References >
 ;;   Add Notes
 ;;   Update Notes
 ;;   Delete Notes
@@ -198,15 +198,20 @@
 ;;   Get Notes on Region >
 ;;   Add Links
 ;;   Delete Links
+;;   Insert >
 ;;   Customize Data Output >
 ;;   Select Database >
 ;;   Show Database Info
+;;   Create Document >
+;;   Cite References >
+;;   Transform Document >
+;;   View Output >
 ;;   ----
 ;;   Administration >
 ;;   ----
 ;;   Show RefDB Message Log
 ;;   Show Version Information
-;;   Info Manual
+;;   Show Manual
 ;;
 ;; Here are brief descriptions of each menu entry:
 ;;
@@ -215,9 +220,14 @@
 ;;     RefDB database.  (Runs 'refdbc -C addref' on current region or buffer.)
 ;;
 ;;   Update References
-;;     Update references in the current region or bufferin the currently selected
+;;     Update references in the current region or buffer in the currently selected
 ;;     RefDB database.  (Runs 'refdbc -C updateref' on current region or buffer.)
 ;;
+;;   Check References
+;;     Check the references in the current region or buffer against the ones
+;;     in the database to find duplicates (Runs 'refdbc -C checkref' on current
+;;     region or buffer.)
+
 ;;   Delete References
 ;;     Delete references by ID from the currently selected
 ;;     RefDB database.  (Runs 'refdbc -C deleteref' on current region.)
@@ -335,6 +345,7 @@
 ;;
 ;;   refdb-addref-on-region
 ;;   refdb-updateref-on-region
+;;   refdb-checkref-on-region
 ;;   refdb-deleteref
 ;;   --
 ;;   refdb-getref-by-author
@@ -1519,6 +1530,11 @@ Note that CITATIONFORMAT is a symbol, not a string."
   "RefDB menu item for updating references."
   )
 
+(defvar refdb-checkref-menu-item
+  ["Check References" (refdb-checkref-on-region) t]
+  "RefDB menu item for checking references."
+  )
+
 (defvar refdb-deleteref-menu-item
   ["Delete References"
    (call-interactively 'refdb-deleteref) t]
@@ -2380,11 +2396,12 @@ FIXME: This probably should be generated from value of `refdb-notesdata-output-t
   (interactive)
   (message
    "refdb-mode %s running against RefDB %s"
-   (car
-    (cdr
-     (split-string  "$Revision: 1.28 $")
-     )
-    )
+;   (car
+;    (cdr
+;     (split-string  "$Revision: 1.28 $")
+;     )
+;    )
+   refdb-mode-version
    (car
     (cdr (split-string
 	  (with-output-to-string
@@ -2440,7 +2457,7 @@ to RIS."
   )
 
 (defun refdb-add-or-update-ref-on-region (mode)
-  "Add \(MODE=add\) or update \(MODE=update\) references to/in the current database. For risx input, the whole buffer will be used. For RIS input, the selected region or the whole buffer (if mark is not set) will be added or updated."
+  "Add \(MODE=add\), check \(MODE=check\), or update \(MODE=update\) references to/against/in the current database. For risx input, the whole buffer will be used. For RIS input, the selected region or the whole buffer (if mark is not set) will be added or updated."
   (interactive)
   ;; temporarily set resize-mini-windows to nil to force Emacs to show
   ;; addref output in separate buffer instead of minibuffer
@@ -2459,12 +2476,18 @@ to RIS."
 	       (if (mark)
 		   (region-end)
 		 (point-max))))
-	(command-string (if (equal mode "add")
-			    "addref"
-			  "updateref"))
-	(message-mode (if (equal mode "add")
-			  "Adding"
-			"Updating"))
+	(command-string (cond ((equal mode "check")
+			       "checkref")
+			      ((equal mode "update")
+			       "updateref")
+			      (t
+			       "addref")))
+	(message-mode (cond ((equal mode "check")
+			     "Checking")
+			    ((equal mode "update")
+			     "Updating")
+			    (t
+			     "Adding")))
 	(message-region (if (or (equal refdb-input-type "risx")
 				(not (mark)))
 			    "current buffer"
@@ -2477,7 +2500,7 @@ to RIS."
 	    (shell-command-on-region
 	     start end
 	     (format
-	      "%s %s -C %s %s -d %s -t %s"
+	      "%s %s -C %s %s -d %s -A %s"
 	      refdb-refdbc-program
 	      refdb-refdbc-options
 	      command-string
@@ -2487,7 +2510,7 @@ to RIS."
 	      )
 	     "*refdb-output*" nil "*refdb-messages*"))
 	  (message
-	   "Displaying output for '%s %s -C %s %s -d %s -t %s'...done"
+	   "Displaying output for '%s %s -C %s %s -d %s -A %s'...done"
 	   refdb-refdbc-program
 	   refdb-refdbc-options
 	   command-string
@@ -2509,7 +2532,8 @@ to RIS."
     )
   ;; set resize-mini-windows back to default value
   (setq resize-mini-windows (get 'resize-mini-windows 'standard-value))
-  (if refdb-update-completion-lists-flag
+  (if (and
+       refdb-update-completion-lists-flag (not (equal mode "check")))
       (refdb-update-completion-lists))
   )
 
@@ -2523,6 +2547,11 @@ to RIS."
   (refdb-add-or-update-ref-on-region "update")
   )
 
+(defun refdb-checkref-on-region ()
+  "Check references against the current database, without adding them permanently. For risx input, the whole buffer will be used. For RIS input, the selected region will be updated."
+  (refdb-add-or-update-ref-on-region "check")
+  )
+
 (defun refdb-deleteref-on-region ()
   "Delete all references in region from current database."
   (interactive)
@@ -2530,7 +2559,7 @@ to RIS."
        "Really delete all references in the current region? "
        )
       ;; temporarily set resize-mini-windows to nil to force Emacs to show
-      ;; addref output in separate buffer instead of minibuffer
+      ;; deleteref output in separate buffer instead of minibuffer
       (progn
 	(setq resize-mini-windows nil)
 	(if (not (eq (length refdb-database) 0))
@@ -6340,6 +6369,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
 ; reference management: r
     ("\C-c\C-rra" . refdb-addref-on-region)
     ("\C-c\C-rru" . refdb-updateref-on-region)
+    ("\C-c\C-rrc" . refdb-checkref-on-region)
     ("\C-c\C-rrd" . refdb-deleteref)
 ; notes management: n
     ("\C-c\C-rna" . refdb-addnote-on-buffer)
@@ -6968,6 +6998,7 @@ Customize this to add/remove/rearrange submenus."
   '(
     refdb-addref-menu-item
     refdb-updateref-menu-item
+    refdb-checkref-menu-item
     refdb-deleteref-menu-item
     refdb-getref-submenu-definition
     refdb-getref-on-region-submenu-definition
@@ -7045,15 +7076,27 @@ Customize this to add/remove/rearrange submenus."
 (make-face 'refdb-output-ok-face)
 (make-face 'refdb-output-warning-face)
 (make-face 'refdb-output-error-face)
+(make-face 'refdb-check-like-face)
+(make-face 'refdb-check-ident-face)
+(make-face 'refdb-check-abbrev-face)
+(make-face 'refdb-check-case-face)
 
 (set-face-foreground 'refdb-output-ok-face "green")
 (set-face-foreground 'refdb-output-warning-face "blue")
 (set-face-foreground 'refdb-output-error-face "red")
+(set-face-foreground 'refdb-check-like-face "goldenrod1")
+(set-face-foreground 'refdb-check-ident-face "spring green")
+(set-face-foreground 'refdb-check-abbrev-face "IndianRed1")
+(set-face-foreground 'refdb-check-case-face "turquoise2")
 
 (defvar refdb-output-font-lock-keywords
   '(
     ;; ok
     ("^\\([0-9][0-9][0-9]:\\).*" 1 'refdb-output-ok-face t)
+    ("^\\(.*LIKE\\).*" 1 'refdb-check-like-face t)
+    ("^\\(.*IDENT\\).*" 1 'refdb-check-ident-face t)
+    ("^\\(.*CASE\\).*" 1 'refdb-check-case-face t)
+    ("^\\(.*ABBREV\\).*" 1 'refdb-check-abbrev-face t)
 
     ;; errors
     ("^\\(209:\\|239:\\|253:\\|255:\\|410:\\|411:\\|412:\\|414:\\|416:\\|417:\\|420:\\).*" 1 'refdb-output-error-face t)

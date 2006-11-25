@@ -243,6 +243,7 @@
 	      <entry>
 		<para>add: <keycap>a</keycap></para>
 		<para>update: <keycap>u</keycap></para>
+		<para>check: <keycap>c</keycap></para>
 		<para>delete: <keycap>d</keycap></para>
 	      </entry>
 	    </row>
@@ -400,6 +401,18 @@
 	</funcsynopsis>
 	<para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>r</keycap><keycap>u</keycap></para>
 	<para>Updates the references in the current buffer, i.e. existing references in the database are updated with the data of the current buffer. Works essentially like the <xref linkend="command-add-references"/> command.</para>
+      </sect2>
+      <sect2 id="command-check-references" xreflabel="Check References">
+	<title>Check References</title>
+	<indexterm><primary sortas="checkref-on-region">refdb-checkref-on-region</primary></indexterm>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef><function>refdb-checkref-on-region</function></funcdef>
+	    <void/>
+	  </funcprototype>
+	</funcsynopsis>
+	<para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>r</keycap><keycap>c</keycap></para>
+	<para>Checks the references in the current buffer against the ones in the current database. You'll get a list of possible duplicate references, author names, periodicals, and keywords.</para>
       </sect2>
       <sect2 id="command-delete-references" xreflabel="Delete References">
 	<title>Delete References</title>

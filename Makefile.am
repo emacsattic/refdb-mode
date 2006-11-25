@@ -19,12 +19,13 @@ htmlsheet="http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl"
 
 all: refdb-mode-config.el refdb-mode-manual.pdf refdb-mode-manual/* refdb-mode.texi
 
-refdb-mode-config.el: refdb-mode-config.el.in
+refdb-mode-config.el: FORCE
 	sed 's%<myrtfviewer>%$(myrtfviewer)%' < $(srcdir)/refdb-mode-config.el.in | \
 	sed 's%<mypsviewer>%$(mypsviewer)%' | \
 	sed 's%<mypdfviewer>%$(mypdfviewer)%' | \
 	sed 's%<mygnumake>%$(mygnumake)%' | \
 	sed 's%<myshell>%$(myshell)%' | \
+	sed 's%<version>%@VERSION@ built from svn revision $(shell svnversion -n .)%' | \
 	sed 's%<sysconfdir>%$(sysconfdir)%' > refdb-mode-config.el
 
 refdb-mode-manual.pdf: refdb-mode-manual.xml
@@ -45,4 +46,5 @@ refdb-mode-manual-stripped.xml: refdb-mode-manual.xml
 refdb-mode.texi: refdb-mode-manual-stripped.xml
 	@mydb2texi@ --to-stdout refdb-mode-manual-stripped.xml > $@
 
+FORCE:
 
