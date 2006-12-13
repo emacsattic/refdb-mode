@@ -1,117 +1,57 @@
-2005-12-21 23:06  mhoenicka
+2006-11-25 00:19  mhoenicka
 
-	* manual.css (1.2): added coloring of pre elements
+	* [r242] Makefile.am, aclocal.m4, refdb-mode-config.el.in,
+	  refdb-mode-manual.xml, refdb-mode.el: added checkref
+	  support;fixed -t vs. -A usage in addref/updateref;added
+	  subversion revision to version output
 
-2005-12-21 23:01  mhoenicka
+2006-08-23 17:58  mhoenicka
 
-	* NEWS (1.2), README (1.3): updated for 1.1
+	* [r131] refdb-mode.el: quote advanced search strings
 
-2005-12-21 21:40  mhoenicka
+2006-08-23 16:37  mhoenicka
 
-	* refdb-mode-manual.xml (1.5): updated for 1.1
+	* [r130] refdb-mode.el: fixed refdb-output-buffer-mode typos
 
-2005-12-21 21:39  mhoenicka
+2006-07-12 20:29  mhoenicka
 
-	* configure.in (1.6): fixed version number
+	* [r82] refdb-mode-manual.xml, refdb-mode.el: added insert commands
 
-2005-12-21 01:19  mhoenicka
+2006-07-11 21:25  mhoenicka
 
-	* refdb-mode.el (1.25): fixed viewer stuff for Windoze
+	* [r81] Makefile.am, configure.in: added check for docbook2texi
 
-2005-12-20 01:26  mhoenicka
+2006-07-10 19:58  mhoenicka
 
-	* refdb-mode.el (1.24): new config option for citation formats,
-	i.e. SGML vs. XML; new function refdb-check-doctype() determines
-	the document type;check doctype to call proper filename for viewing
-	html output from SGML;use proper citation format for SGML and XML
+	* [r78] manual-fo.xsl: added missing stylesheet
 
-2005-12-19 10:30  mhoenicka
+2006-07-09 18:12  mhoenicka
 
-	* refdb-mode.el (1.23): fixed probs with previous checkin
+	* [r77] autogen.sh, configure.in: minor updates
 
-2005-12-19 10:25  mhoenicka
+2006-07-09 18:11  mhoenicka
 
-	* refdb-mode.el (1.22): removed leftover reference to
-	refdb-check-doctype
+	* [r76] Makefile.am, striptable.pl: need to strip table from
+	  manual for texi version
 
-2005-12-19 00:55  mhoenicka
+2006-07-09 18:10  mhoenicka
 
-	* configure.in (1.5): some more additions and fixes for the viewer
-	detection
+	* [r75] refdb-mode-manual.xml: added keybindings;added citation
+	  support for LaTeX
 
-2005-12-19 00:52  mhoenicka
+2006-07-09 18:10  mhoenicka
 
-	* refdb-mode-manual.xml (1.4): updated for 1.2
+	* [r74] refdb-mode.el: added keybindings;added citation support
+	  for LaTeX
 
-2005-12-19 00:50  mhoenicka
+2006-06-30 20:54  mhoenicka
 
-	* refdb-mode.el (1.21): adapt query prompts to database engine
-	used;use start-process-shell-command instead of start-process to
-	simplify setup on Windoze;create empty xref elements with end tag
-	compatible with both XML and SGML
+	* [r45] autogen.sh: added script to build autotools files
 
-2005-12-08 01:58  mhoenicka
+2006-04-14 19:36  mhoenicka
 
-	* refdb-mode-manual.xml (1.3): added
-	refdb-getref-from-citation;added NTEmacs setup instructions
-
-2005-12-08 01:56  mhoenicka
-
-	* refdb-mode.el (1.20): added L1-L4 to tag list;new config variable
-	refdb-default-ris-encoding;new function refdb-getref-from-citation
-
-2005-11-26 01:26  mhoenicka
-
-	* refdb-mode.el (1.19): added refdb-sysconfdir;added minibuffer
-	completion to a couple of functions
-
-2005-11-26 01:23  mhoenicka
-
-	* refdb-mode-manual.xml (1.2): added administrative functions
-
-2005-11-26 01:21  mhoenicka
-
-	* refdb-mode-config.el.in (1.2): added refdb-sysconfdir
-
-2005-11-26 01:20  mhoenicka
-
-	* configure.in (1.4): added more viewers
-
-2005-11-20 21:28  mhoenicka
-
-	* refdb-mode-manual.xml (1.1), ChangeLog (1.2): initial version
-
-2005-11-20 21:27  mhoenicka
-
-	* configure.in (1.3): added viewer apps and paths
-
-2005-11-20 21:26  mhoenicka
-
-	* README (1.2): added installation instructions
-
-2005-11-19 20:25  mhoenicka
-
-	* refdb-mode.el (1.18): fix typo in getnote-on-region()
-
-2005-11-19 20:23  mhoenicka
-
-	* configure.in (1.2): search for viewing programs
-
-2005-11-19 20:22  mhoenicka
-
-	* refdb-mode-config.el.in (1.1): replaces refdb-mode-config.el
-
-2005-11-19 20:21  mhoenicka
-
-	* refdb-mode-config.el (1.3): replaced by refdb-mode-config.el.in
-
-2005-11-19 20:20  mhoenicka
-
-	* Makefile.am (1.6): create chunked HTML output with CSS styling;
-	install refdb-mode-config.el as config file; preconfigure
-	refdb-mode-config.el
-
-2005-11-19 20:19  mhoenicka
-
-	* manual.css (1.1): initial version
+	* [r4] elisp, ., AUTHORS, COPYING, ChangeLog, INSTALL,
+	  Makefile.am, NEWS, README, aclocal.m4, configure.in, manual.css,
+	  refdb-mode-config.el.in, refdb-mode-manual.xml, refdb-mode.el,
+	  ris.el: initial elisp import from CVS checkout
 
