@@ -3,7 +3,7 @@ dnl $Id: configure.in,v 1.7 2005/12/25 00:27:49 mhoenicka Exp $
 
 dnl check for one of the source files
 AC_INIT(refdb-mode.el)
-AM_INIT_AUTOMAKE(refdb-elisp, 1.3)
+AM_INIT_AUTOMAKE(refdb-elisp, 1.4)
 
 dnl find Emacs and set site-lisp path
 AM_PATH_LISPDIR
