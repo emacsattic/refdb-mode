@@ -6534,7 +6534,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
     ("\C-c\C-rcd" . refdb-create-docbook-citation-from-point)
     ("\C-c\C-rct" . refdb-create-tei-citation-from-point)
     ("\C-c\C-rcl" . refdb-create-latex-citation-from-point)
-    ("\C-c\C-rck" . refdb-create-muse-citation-from-point)
+    ("\C-c\C-rcm" . refdb-create-muse-citation-from-point)
     ))
 
 (defvar refdb-menu-item-separator1

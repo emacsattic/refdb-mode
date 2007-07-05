@@ -301,7 +301,7 @@
 		<para>cite as DocBook from point: <keycap>d</keycap></para>
 		<para>cite as TEI from point: <keycap>t</keycap></para>
 		<para>cite as LaTeX from point: <keycap>l</keycap></para>
-		<para>cite as Muse from point: <keycap>k</keycap></para>
+		<para>cite as Muse from point: <keycap>m</keycap></para>
 		<para>cite as DocBook (region): <keycap>s</keycap></para>
 		<para>cite as TEI (region): <keycap>t</keycap></para>
 		<para>cite as LaTeX (region): <keycap>x</keycap></para>
@@ -1308,6 +1308,18 @@
 	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>l</keycap></para>
 	    <para>Creates a LaTeX citation element from the reference (in RIS or RISX format) containing point and puts it into the kill ring.</para>
 	  </sect3>
+	  <sect3 id="command-create-muse-citation-from-point" xreflabel="Current as Muse">
+	    <title>Current as Muse</title>
+	    <indexterm><primary sortas="create-muse-citation-from-point">refdb-create-muse-citation-from-point</primary></indexterm>
+	    <funcsynopsis>
+	      <funcprototype>
+		<funcdef><function>refdb-create-muse-citation-from-point</function></funcdef>
+		<void/>
+	      </funcprototype>
+	    </funcsynopsis>
+	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>m</keycap></para>
+	    <para>Creates a Muse citation element from the reference (in RIS or RISX format) containing point and puts it into the kill ring.</para>
+	  </sect3>
 	  <sect3 id="command-create-docbook-citation-on-region" xreflabel="In Region as DocBook">
 	    <title>In Region as DocBook</title>
 	    <indexterm><primary sortas="create-docbook-citation-on-region">refdb-create-docbook-citation-on-region</primary></indexterm>
@@ -1343,6 +1355,18 @@
 	    </funcsynopsis>
 	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>x</keycap></para>
 	    <para>Creates a LaTeX citation element from the reference (in RIS or RISX format) contained in the current region and puts it into the kill ring.</para>
+	  </sect3>
+	  <sect3 id="command-create-muse-citation-on-region" xreflabel="In Region as Muse">
+	    <title>In Region as Muse</title>
+	    <indexterm><primary sortas="create-muse-citation-on-region">refdb-create-muse-citation-on-region</primary></indexterm>
+	    <funcsynopsis>
+	      <funcprototype>
+		<funcdef><function>refdb-create-muse-citation-on-region</function></funcdef>
+		<void/>
+	      </funcprototype>
+	    </funcsynopsis>
+	    <para>bound to: <keycombo><keycap>Ctrl</keycap><keycap>c</keycap></keycombo><keycombo><keycap>Ctrl</keycap><keycap>r</keycap></keycombo><keycap>c</keycap><keycap>y</keycap></para>
+	    <para>Creates a Muse citation element from the reference (in RIS or RISX format) contained in the current region and puts it into the kill ring.</para>
 	  </sect3>
 	</sect2>
       <sect2 id="command-transform-document" xreflabel="Transform Document">
