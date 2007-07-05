@@ -27,6 +27,7 @@
 (add-hook 'bibtex-mode-hook 'refdb-mode)
 (add-hook 'psgml-mode-hook 'refdb-mode)
 (add-hook 'sgml-mode-hook 'refdb-mode)
+(add-hook 'muse-mode-hook 'refdb-mode)
 (add-hook 'refdb-output-mode-hook 'refdb-mode)
 
 ;; this will highlight the currently selected region. It is highly

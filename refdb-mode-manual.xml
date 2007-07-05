@@ -16,7 +16,7 @@
   </bookinfo>
   <preface>
     <title>Preface</title>
-    <para>refdb-mode turns GNU Emacs into a frontend for <ulink url="http://refdb.sourceforge.net">RefDB</ulink>, a reference manager and bibliography tool for markup languages. refdb-mode is a minor mode which works well alongside the major modes PSGML (SGML editing), nxml-mode (XML editing), auctex (LaTeX editing), and ris-mode (RIS editing). It offers a full set of menu commands for reference and notes management, allowing you to conveniently use Emacs to create or update references and notes. Moreover, it allows you to create DocBook and TEI documents for use with RefDB. You can transform the documents and view the results with a mouseclick. It integrates seamlessly into your authoring process, allowing you to search for references and yank them directly in place, without ever leaving Emacs. Finally, there is also a full set of administrative commands to control all aspects of RefDB configuration and administration.</para>
+    <para>refdb-mode turns GNU Emacs into a frontend for <ulink url="http://refdb.sourceforge.net">RefDB</ulink>, a reference manager and bibliography tool for markup languages. refdb-mode is a minor mode which works well alongside the major modes PSGML (SGML editing), nxml-mode (XML editing), auctex (LaTeX editing), muse-mode (Muse and Planner), and ris-mode (RIS editing). It offers a full set of menu commands for reference and notes management, allowing you to conveniently use Emacs to create or update references and notes. Moreover, it allows you to create DocBook and TEI documents for use with RefDB. You can transform the documents and view the results with a mouseclick. It integrates seamlessly into your authoring process, allowing you to search for references and yank them directly in place, or to do reverse lookups from cited references, without ever leaving Emacs. Finally, there is also a full set of administrative commands to control all aspects of RefDB configuration and administration.</para>
     <para>This manual gives a brief overview of how to use refdb-mode, followed by a more thorough description of all available commands.</para>
     <para>Please visit the <ulink url="http://refdb.sourceforge.net">RefDB web page</ulink> for further information about RefDB and for the addresses of mailing lists where problems with refdb-mode can be discussed.</para>
   </preface>
@@ -301,9 +301,11 @@
 		<para>cite as DocBook from point: <keycap>d</keycap></para>
 		<para>cite as TEI from point: <keycap>t</keycap></para>
 		<para>cite as LaTeX from point: <keycap>l</keycap></para>
+		<para>cite as Muse from point: <keycap>k</keycap></para>
 		<para>cite as DocBook (region): <keycap>s</keycap></para>
 		<para>cite as TEI (region): <keycap>t</keycap></para>
 		<para>cite as LaTeX (region): <keycap>x</keycap></para>
+		<para>cite as Muse (region): <keycap>y</keycap></para>
 	      </entry>
 	    </row>
 	  </tbody>

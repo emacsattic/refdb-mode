@@ -251,10 +251,11 @@
 ;;     (Provides submenus for performing various queries by passing parameters
 ;;     to 'refdbc -C getref'.)
 ;;
-;;   Get References in Citation
-;;     Move point somewhere into a citation (i.e. a <citation> element in
-;;     a DocBook document and a <seg> in a TEI document), and this command
-;;     will retrieve all references cited in this element.
+;;   Get References in Citation Move point somewhere into a citation
+;;     (i.e. a <citation> element in a DocBook document, a <seg> in a
+;;     TEI document, a \cite{} in a LaTeX document, or a <cite> in a
+;;     Muse document), and this command will retrieve all references
+;;     cited in this element.
 ;;
 ;;   Pick References
 ;;     Add references to your personal reference list
@@ -266,11 +267,11 @@
 ;;     Run contents of the current buffer through various filters to convert
 ;;     the reference data format to or from RIS
 ;;
-;;   Cite References
-;;     Select one or more references in a RIS or risx buffer and use one
-;;     of the commands of this submenu to copy a DocBook or TEI citation
-;;     containing these references to the kill ring. You can then switch to
-;;     a DocBook or TEI document buffer and yank (Ctrl-y) the citation
+;;   Cite References Select one or more references in a RIS or risx
+;;     buffer and use one of the commands of this submenu to copy a
+;;     DocBook, TEI, LaTeX, or Muse citation containing these
+;;     references to the kill ring. You can then switch to an
+;;     appropriate document buffer and yank (Ctrl-y) the citation
 ;;     wherever you need it.
 ;;
 ;;   Add Notes
@@ -431,8 +432,10 @@
 ;;   refdb-view-output
 ;;   refdb-create-docbook-citation-on-region
 ;;   refdb-create-tei-citation-on-region
+;;   refdb-create-muse-citation-on-region
 ;;   refdb-create-docbook-citation-from-point
 ;;   refdb-create-tei-citation-from-point
+;;   refdb-create-muse-citation-from-point
 ;;   --
 ;;   refdb-addstyle-on-buffer
 ;;   refdb-liststyle
@@ -1721,6 +1724,13 @@ Note that CITATIONFORMAT is a symbol, not a string."
   "RefDB cite point as LaTeX menu item."
   )
 
+(defvar refdb-create-muse-citation-from-point-menu-item
+  ["Current as Muse"
+   (refdb-create-muse-citation-from-point)
+   t]
+  "RefDB cite point as Muse menu item."
+  )
+
 (defvar refdb-create-docbook-citation-on-region-menu-item
   ["In Region as DocBook"
    (refdb-create-docbook-citation-on-region)
@@ -1740,6 +1750,13 @@ Note that CITATIONFORMAT is a symbol, not a string."
    (refdb-create-latex-citation-on-region)
    t]
   "RefDB cite range as LaTeX menu item."
+  )
+
+(defvar refdb-create-muse-citation-on-region-menu-item
+  ["In Region as Muse"
+   (refdb-create-muse-citation-on-region)
+   t]
+  "RefDB cite range as Muse menu item."
   )
 
 (defvar refdb-addnote-menu-item
@@ -2686,22 +2703,27 @@ You shouldn't call this function directly.  Instead call, e.g.,
   (setq resize-mini-windows-default resize-mini-windows)
   (setq resize-mini-windows nil)
   (let ((formatstring
-	(if (equal refdb-data-output-format 'more)
-	    (format "\'%s\'"
-		    ;; turn list of symbols into one big string
-		    (mapconcat
-		     'symbol-name
-		     refdb-data-output-additional-fields
-		     ""
-		     )
-		    )
-	  (upcase (symbol-name refdb-data-output-format))
-	  )
+	(cond ((equal refdb-data-output-format 'more)
+	       (format "-s \'%s\'"
+		       ;; turn list of symbols into one big string
+		       (mapconcat
+			'symbol-name
+			refdb-data-output-additional-fields
+			""
+			)
+		       ))
+	      ((equal refdb-data-output-format 'default)
+	       nil)
+	      (t
+	       (format "-s \'%s\'"
+		       (upcase (symbol-name refdb-data-output-format))
+		       ))
+	      )
 	))
     (if (not (eq (length refdb-database) 0))
 	(shell-command
 	 (format
-	  "%s %s -C getref \":%s:=\'%s\'\" %s -d %s -t %s -s %s"
+	  "%s %s -C getref \":%s:=\'%s\'\" %s -d %s -t %s %s"
 	  refdb-refdbc-program
 	  refdb-refdbc-options
 	  field
@@ -2721,7 +2743,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
       )
     (message
      (format
-      "Displaying output for '%s %s -C getref \":%s:='%s'\" %s -d %s -t %s -s %s'...done"
+      "Displaying output for '%s %s -C getref \":%s:='%s'\" %s -d %s -t %s %s'...done"
       refdb-refdbc-program
       refdb-refdbc-options
       field
@@ -2751,22 +2773,27 @@ You shouldn't call this function directly.  Instead call, e.g.,
   (setq resize-mini-windows-default resize-mini-windows)
   (setq resize-mini-windows nil)
   (let ((formatstring
-	(if (equal refdb-data-output-format 'more)
-	    (format "\\\"%s\\\""
-		    ;; turn list of symbols into one big string
-		    (mapconcat
-		     'symbol-name
-		     refdb-data-output-additional-fields
-		     " "
-		     )
-		    )
-	  (upcase (symbol-name refdb-data-output-format))
-	  )
+	(cond ((equal refdb-data-output-format 'more)
+	       (format "-s \'%s\'"
+		       ;; turn list of symbols into one big string
+		       (mapconcat
+			'symbol-name
+			refdb-data-output-additional-fields
+			""
+			)
+		       ))
+	      ((equal refdb-data-output-format 'default)
+	       nil)
+	      (t
+	       (format "-s \'%s\'"
+		       (upcase (symbol-name refdb-data-output-format))
+		       ))
+	      )
 	))
     (if (not (eq (length refdb-database) 0))
 	(shell-command
 	 (format
-	  "%s %s -C getref \":%s:~\'%s\'\" %s -d %s -t %s -s %s"
+	  "%s %s -C getref \":%s:~\'%s\'\" %s -d %s -t %s %s"
 	  refdb-refdbc-program
 	  refdb-refdbc-options
 	  field
@@ -2786,7 +2813,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
       )
     (message
      (format
-      "Displaying output for '%s %s -C getref \":%s:~'%s'\" %s -d %s -t %s -s %s'...done"
+      "Displaying output for '%s %s -C getref \":%s:~'%s'\" %s -d %s -t %s %s'...done"
       refdb-refdbc-program
       refdb-refdbc-options
       field
@@ -3004,24 +3031,29 @@ You shouldn't call this function directly.  Instead call, e.g.,
   (setq resize-mini-windows-default resize-mini-windows)
   (setq resize-mini-windows nil)
   (let ((formatstring
-	 (if (equal refdb-data-output-format 'more)
-	     (format "\\\"%s\\\""
-		     ;; turn list of symbols into one big string
-		     (mapconcat
-		      'symbol-name
-		      refdb-data-output-additional-fields
-		      " "
-		      )
-		     )
-	   (upcase (symbol-name refdb-data-output-format))
-	   )
+	 (cond ((equal refdb-data-output-format 'more)
+		(format "-s \'%s\'"
+			;; turn list of symbols into one big string
+			(mapconcat
+			 'symbol-name
+			 refdb-data-output-additional-fields
+			 ""
+			 )
+			))
+	       ((equal refdb-data-output-format 'default)
+		"")
+	       (t
+		(format "-s \'%s\'"
+			(upcase (symbol-name refdb-data-output-format))
+			))
+	       )
 	 ))
     (message (format "Getting datasets for search string \"%s\" ..." searchstring))
     (if (not (eq (length refdb-database) 0))
 	(progn
 	  (shell-command
 	   (format
-	    "%s %s -C getref \"%s\" %s -d %s -t %s -s %s"
+	    "%s %s -C getref \"%s\" %s -d %s -t %s %s"
 	    refdb-refdbc-program
 	    refdb-refdbc-options
 	    searchstring
@@ -3042,7 +3074,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
       )
     (message
      (format
-      "Displaying output for '%s %s -C getref \"%s\" %s -d %s -t %s -s %s'...done"
+      "Displaying output for '%s %s -C getref \"%s\" %s -d %s -t %s %s'...done"
       refdb-refdbc-program
       refdb-refdbc-options
       searchstring
@@ -3110,35 +3142,54 @@ You shouldn't call this function directly.  Instead call, e.g.,
   "Display all references cited in the citation containing Point."
   (interactive)
   (save-excursion
-    (let ((eoc (re-search-forward "</citation *>\\|</seg *>\\|}" nil t))
+    (let ((eoc (re-search-forward "</citation *>\\|</seg *>\\|</cite *>\\|}" nil t))
 	  (id-string))
-      (if (null
-	   (string-match
-	    "sgml\\|xml"
-	    (downcase (symbol-name major-mode))))
-	  ; most likely a LaTeX document
-	  (progn
-	    (re-search-backward "{" nil t)
-	    (while (re-search-forward "\\([^{][^,}]+\\)[,\\|}]" eoc t)
-	      (let ((target (match-string 1 nil)))
-		(if (string-match "^[0-9]$" target)
-		    (setq id-string (concat id-string " OR :ID:=" target))
-		  (setq id-string (concat id-string " OR :CK:=" target)))
-		)
-	      )
+      (cond ((null
+	      (string-match
+	       "sgml\\|xml\\|muse"
+	       (downcase (symbol-name major-mode))))
+					; most likely a LaTeX document
+	     (progn
+	       (re-search-backward "{" nil t)
+	       (while (re-search-forward "\\([^{][^,}]+\\)[,\\|}]" eoc t)
+		 (let ((target (match-string 1 nil)))
+		   (if (string-match "^[0-9]$" target)
+		       (setq id-string (concat id-string " OR :ID:=" target))
+		     (setq id-string (concat id-string " OR :CK:=" target)))
+		   )
+		 )
+	       )
+	     )
+	    ((string-match
+	      "muse"
+	      (downcase (symbol-name major-mode)))
+					; Muse document
+	     (progn
+	       (re-search-backward "<cite>" nil t)
+	       (forward-char 6)
+	       (while (re-search-forward "\\([^<][^;<]+\\)[;\\|<]" eoc t)
+		 (let ((target (match-string 1 nil)))
+		   (if (string-match "^[0-9]$" target)
+		       (setq id-string (concat id-string " OR :ID:=" target))
+		     (setq id-string (concat id-string " OR :CK:=" target)))
+		   )
+		 )
+	       )
+	     )
+	    (t
+					; else: SGML/XML or Muse document
+	     (re-search-backward "<citation role=\"REFDB\" *>\\|<seg type=\"REFDBCITATION\".*>\\|<cite *>" nil t)
+	     ;; in multiple citations the first linkend is from the multiple definition but this doesn't hurt the query
+	     (while (re-search-forward "\\(target\\|linkend\\)=\"ID\\([^-\"]+\\)" eoc t)
+	       (let ((target (match-string 2 nil)))
+		 ;; see whether ID is a numeric ID or an alphanumeric CK
+		 (if (string-match "^[0-9]$" target)
+		     (setq id-string (concat id-string " OR :ID:=" target))
+		   (setq id-string (concat id-string " OR :CK:=" target)))
+		 )
+	       )
+	     )
 	    )
-	; else: SGML/XML document
-	(re-search-backward "<citation role=\"REFDB\" *>\\|<seg type=\"REFDBCITATION\".*>" nil t)
-	;; in multiple citations the first linkend is from the multiple definition but this doesn't hurt the query
-	(while (re-search-forward "\\(target\\|linkend\\)=\"ID\\([^-\"]+\\)" eoc t)
-	  (let ((target (match-string 2 nil)))
-	    ;; see whether ID is a numeric ID or an alphanumeric CK
-	    (if (string-match "^[0-9]$" target)
-		(setq id-string (concat id-string " OR :ID:=" target))
-	      (setq id-string (concat id-string " OR :CK:=" target)))
-	    )
-	  )
-	)
       (if (not (eq (length id-string) 0))
 	  ;; each cycle adds an " OR " at the beginning. We don't need the first one
 	  (refdb-getref-by-advanced-search (substring id-string 4))
@@ -3501,22 +3552,27 @@ You shouldn't call this function directly.  Instead call, e.g.,
   (setq resize-mini-windows-default resize-mini-windows)
   (setq resize-mini-windows nil)
   (let ((formatstring
-	(if (equal refdb-data-output-format 'more)
-	    (format "\\\"%s\\\""
-		    ;; turn list of symbols into one big string
-		    (mapconcat
-		     'symbol-name
-		     refdb-data-output-additional-fields
-		     " "
-		     )
-		    )
-	  (upcase (symbol-name refdb-data-output-format))
-	  )
+	(cond ((equal refdb-data-output-format 'more)
+	       (format "-s \'%s\'"
+		       ;; turn list of symbols into one big string
+		       (mapconcat
+			'symbol-name
+			refdb-data-output-additional-fields
+			""
+			)
+		       ))
+	      ((equal refdb-data-output-format 'default)
+	       nil)
+	      (t
+	       (format "-s \'%s\'"
+		       (upcase (symbol-name refdb-data-output-format))
+		       ))
+	      )
 	))
     (if (not (eq (length refdb-database) 0))
 	(shell-command
 	 (format
-	  "%s %s -C getnote \":%s:=\'%s\'\" %s -d %s -t %s -s %s"
+	  "%s %s -C getnote \":%s:=\'%s\'\" %s -d %s -t %s %s"
 	  refdb-refdbc-program
 	  refdb-refdbc-options
 	  field
@@ -3536,7 +3592,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
       )
     (message
      (format
-      "Displaying output for '%s %s -C getnote \":%s:=\'%s\'\" %s -d %s -t %s -s %s'...done"
+      "Displaying output for '%s %s -C getnote \":%s:=\'%s\'\" %s -d %s -t %s %s'...done"
       refdb-refdbc-program
       refdb-refdbc-options
       field
@@ -3566,22 +3622,27 @@ You shouldn't call this function directly.  Instead call, e.g.,
   (setq resize-mini-windows-default resize-mini-windows)
   (setq resize-mini-windows nil)
   (let ((formatstring
-	(if (equal refdb-data-output-format 'more)
-	    (format "\\\"%s\\\""
-		    ;; turn list of symbols into one big string
-		    (mapconcat
-		     'symbol-name
-		     refdb-data-output-additional-fields
-		     " "
-		     )
-		    )
-	  (upcase (symbol-name refdb-data-output-format))
-	  )
+	(cond ((equal refdb-data-output-format 'more)
+	       (format "-s \'%s\'"
+		       ;; turn list of symbols into one big string
+		       (mapconcat
+			'symbol-name
+			refdb-data-output-additional-fields
+			""
+			)
+		       ))
+	      ((equal refdb-data-output-format 'default)
+	       nil)
+	      (t
+	       (format "-s \'%s\'"
+		       (upcase (symbol-name refdb-data-output-format))
+		       ))
+	      )
 	))
     (if (not (eq (length refdb-database) 0))
 	(shell-command
 	 (format
-	  "%s %s -C getnote \":%s:~\'%s\'\" %s -d %s -t %s -s %s"
+	  "%s %s -C getnote \":%s:~\'%s\'\" %s -d %s -t %s %s"
 	  refdb-refdbc-program
 	  refdb-refdbc-options
 	  field
@@ -3601,7 +3662,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
       )
     (message
      (format
-      "Displaying output for '%s %s -C getnote \":%s:~\'%s\'\" %s -d %s -t %s -s %s'...done"
+      "Displaying output for '%s %s -C getnote \":%s:~\'%s\'\" %s -d %s -t %s %s'...done"
       refdb-refdbc-program
       refdb-refdbc-options
       field
@@ -3794,24 +3855,29 @@ You shouldn't call this function directly.  Instead call, e.g.,
   (setq resize-mini-windows-default resize-mini-windows)
   (setq resize-mini-windows nil)
   (let ((formatstring
-	 (if (equal refdb-data-output-format 'more)
-	     (format "\\\"%s\\\""
-		     ;; turn list of symbols into one big string
-		     (mapconcat
-		      'symbol-name
-		      refdb-data-output-additional-fields
-		      " "
-		      )
-		     )
-	   (upcase (symbol-name refdb-data-output-format))
-	   )
+	 (cond ((equal refdb-data-output-format 'more)
+		(format "-s \'%s\'"
+			;; turn list of symbols into one big string
+			(mapconcat
+			 'symbol-name
+			 refdb-data-output-additional-fields
+			 ""
+			 )
+			))
+	       ((equal refdb-data-output-format 'default)
+		nil)
+	       (t
+		(format "-s \'%s\'"
+			(upcase (symbol-name refdb-data-output-format))
+			))
+	       )
 	 ))
     (message (format "Getting notes for search string \"%s\" ..." searchstring))
     (if (not (eq (length refdb-database) 0))
 	(progn
 	  (shell-command
 	   (format
-	    "%s %s -C getnote \"%s\" %s -d %s -t %s -s %s"
+	    "%s %s -C getnote \"%s\" %s -d %s -t %s %s"
 	    refdb-refdbc-program
 	    refdb-refdbc-options
 	    searchstring
@@ -3832,7 +3898,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
       )
     (message
      (format
-      "Displaying output for '%s %s -C getnote \"%s\" %s -d %s -t %s -s %s'...done"
+      "Displaying output for '%s %s -C getnote \"%s\" %s -d %s -t %s %s'...done"
       refdb-refdbc-program
       refdb-refdbc-options
       searchstring
@@ -4388,6 +4454,8 @@ on the references within the current region in a getref buffer."
 	    (format "<seg type=\"REFDBCITATION\" part=\"N\" TEIform=\"seg\">%s</seg>" my-id-string))
 	   ((eq type 'latex)
 	    (format "\\cite{%s}" my-id-string))
+	   ((eq type 'muse)
+	    (format "<cite>%s</cite>" my-id-string))
 	   )
        )
     )
@@ -4420,6 +4488,15 @@ Use the entire buffer if mark is not set."
   (message "Added citations in range to the kill ring as LaTeX")
   )
 
+(defun refdb-create-muse-citation-on-region ()
+  "Provide a Muse citation element in the kill ring based
+on the references within the current region in a getref buffer.
+Use the entire buffer if mark is not set."
+  (interactive)
+  (refdb-create-citation-on-region 'muse)
+  (message "Added citations in range to the kill ring as Muse")
+  )
+
 (defun refdb-get-ris-idstring-from-region (type)
   "Scan the currently selected region for RIS ID elements and return their
 values as a list of strings. Use the entire buffer if mark is not set."
@@ -4440,7 +4517,9 @@ values as a list of strings. Use the entire buffer if mark is not set."
       (while (re-search-forward "^ID  - \\(.*\\)$" region-extended-end t)
 	(if (eq type 'latex)
 	    (setq id-string (concat id-string "," (match-string 1 nil)))
-	  (if (eq refdb-citation-type 'short)
+	  (if (or
+	       (eq refdb-citation-type 'short)
+	       (eq type 'muse))
 	      (setq id-string (concat id-string ";" (match-string 1 nil)))
 	    ;; the xref notation must be adapted to SGML and XML
 	    (setq id-string (concat id-string 
@@ -4458,12 +4537,14 @@ values as a list of strings. Use the entire buffer if mark is not set."
       (cond ((and
 	      (or
 	       (eq refdb-citation-type 'short)
-	       (eq type 'latex))
+	       (eq type 'latex)
+	       (eq type 'muse))
 	      (not (string= id-string "")))
 	     (substring id-string 1))
 	    ((and
 	      (eq refdb-citation-type 'full)
-	      (not (eq type 'latex))
+	      (not (or (eq type 'latex)
+		       (eq type 'muse)))
 	      (not (string= id-string "")))
 	     (let ((linkend
 		    (progn
@@ -4474,7 +4555,7 @@ values as a list of strings. Use the entire buffer if mark is not set."
 		(format
 		 (if (eq refdb-citation-format 'xml)
 		     "<xref endterm=\"IM0\" linkend=\"%s\" role=\"MULTIXREF\"/>"
-		     "<xref endterm=\"IM0\" linkend=\"%s\" role=\"MULTIXREF\">")
+		   "<xref endterm=\"IM0\" linkend=\"%s\" role=\"MULTIXREF\">")
 		 linkend
 		 )
 		id-string)
@@ -4506,7 +4587,9 @@ values as a list of strings."
       (while (re-search-forward "citekey=\"\\([^\"]*\\)\"" region-extended-end t)
 	(if (eq type 'latex)
 	    (setq id-string (concat id-string "," (match-string 1 nil)))
-	  (if (eq refdb-citation-type 'short)
+	  (if (or
+	       (eq refdb-citation-type 'short)
+	       (eq type 'muse))
 	      (setq id-string (concat id-string ";" (match-string 1 nil)))
 	    ;; the xref notation must be adapted to SGML and XML
 	    (setq id-string (concat id-string 
@@ -4524,12 +4607,14 @@ values as a list of strings."
       (cond ((and
 	      (or
 	       (eq refdb-citation-type 'short)
-	       (eq type 'latex))
+	       (eq type 'latex)
+	       (eq type 'muse))
 	      (not (string= id-string "")))
 	     (substring id-string 1))
 	    ((and
 	      (eq refdb-citation-type 'full)
-	      (not (eq type 'latex))
+	      (not (or (eq type 'latex)
+		       (eq type 'muse)))
 	      (not (string= id-string "")))
 	     (let ((linkend
 		    (progn
@@ -4572,6 +4657,8 @@ on the reference where point is currently located in a getref buffer."
 	    (format "<seg type=\"REFDBCITATION\" part=\"N\" TEIform=\"seg\">%s</seg>" my-id))
 	   ((eq type 'latex)
 	    (format "\\cite{%s}" my-id))
+	   ((eq type 'muse)
+	    (format "<cite>%s</cite>" my-id))
 	   )
      )
     )
@@ -4601,6 +4688,14 @@ on the reference where point is currently located in a getref buffer."
   (message "Added citation from point to the kill ring as LaTeX")
   )
 
+(defun refdb-create-muse-citation-from-point ()
+  "Provide a Muse citation element in the kill ring based
+on the reference where point is currently located in a getref buffer."
+  (interactive)
+  (refdb-create-citation-from-point 'muse)
+  (message "Added citation from point to the kill ring as Muse")
+  )
+
 (defun refdb-get-ris-id-from-point (type)
   "Search for the ID of the current reference in a RIS buffer."
   (save-excursion
@@ -4609,7 +4704,8 @@ on the reference where point is currently located in a getref buffer."
       (if (re-search-forward "^ID  - \\(.*\\)$" eor t)
 	  (if (or
 	       (eq refdb-citation-type 'short)
-	       (eq type 'latex))
+	       (eq type 'latex)
+	       (eq type 'muse))
 	      (match-string 1 nil)
 	    ;; the xref notation used here works for both SGML and XML
 	    (format
@@ -6434,9 +6530,11 @@ You shouldn't call this function directly.  Instead call, e.g.,
     ("\C-c\C-rcs" . refdb-create-docbook-citation-on-region)
     ("\C-c\C-rcr" . refdb-create-tei-citation-on-region)
     ("\C-c\C-rcx" . refdb-create-latex-citation-on-region)
+    ("\C-c\C-rcy" . refdb-create-muse-citation-on-region)
     ("\C-c\C-rcd" . refdb-create-docbook-citation-from-point)
     ("\C-c\C-rct" . refdb-create-tei-citation-from-point)
     ("\C-c\C-rcl" . refdb-create-latex-citation-from-point)
+    ("\C-c\C-rck" . refdb-create-muse-citation-from-point)
     ))
 
 (defvar refdb-menu-item-separator1
@@ -6899,10 +6997,12 @@ Customize this to add/remove/rearrange submenus."
     refdb-create-docbook-citation-from-point-menu-item
     refdb-create-tei-citation-from-point-menu-item
     refdb-create-latex-citation-from-point-menu-item
+    refdb-create-muse-citation-from-point-menu-item
     refdb-menu-item-separator4
     refdb-create-docbook-citation-on-region-menu-item
     refdb-create-tei-citation-on-region-menu-item
     refdb-create-latex-citation-on-region-menu-item
+    refdb-create-muse-citation-on-region-menu-item
     )
   "*Contents of 'Cite References' submenu for RefDB mode.
 Customize this to add/remove/rearrange submenus."
