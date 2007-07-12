@@ -1271,7 +1271,10 @@
       </sect2>
       <sect2 id="submenu-cite-references" xreflabel="Cite References">
 	  <title>Cite References submenu</title>
-	  <para>This submenu contains the command to create citations of references and put them into the kill ring. The citations are then available to be yanked in your source document.</para>
+	  <para>This submenu contains the command to create citations of references and put them into the kill ring. The citations are then available to be yanked in your source document. You can either cite a single reference by moving point into it, or you can cite several references by marking a region to create a multi-head citation.</para>
+	  <note>
+	    <para>To create proper multi-head citations all references that should be cited have to be in a consecutive region. You can either run an appropriate query that retrieves only the desired references, or you can edit the *refdb-output* buffer appropriately. Remember that deleting or reshuffling references in that buffer does not affect the references in the database - the *refdb-output* buffer is merely a text copy that you can modify to your hearts content.</para>
+	  </note>
 	  <sect3 id="command-create-docbook-citation-from-point" xreflabel="Current as DocBook">
 	    <title>Current as DocBook</title>
 	    <indexterm><primary sortas="create-docbook-citation-from-point">refdb-create-docbook-citation-from-point</primary></indexterm>
