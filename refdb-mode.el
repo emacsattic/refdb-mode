@@ -1216,7 +1216,7 @@ the database value in all RefDB commands."
 (defun refdb-list-authors ()
   "List authors returned by 'refdbc -C getau'."
   (message
-   "Building list of authors using '%s %s -d %s -C getau'..."
+   "Building list of authors using '%s %s -d %s -C getax'..."
    refdb-refdbc-program
    refdb-refdbc-options
    refdb-database
@@ -1227,7 +1227,7 @@ the database value in all RefDB commands."
 	 standard-output
        (call-process
 	shell-file-name nil '(t nil) nil shell-command-switch
-	(format "%s %s -d %s -C getau"
+	(format "%s %s -d %s -C getax"
 		refdb-refdbc-program
 		refdb-refdbc-options
 		refdb-database
@@ -2926,7 +2926,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
 		)
 	       )
   (refdb-message-getting-refs 'author "=" author)
-  (refdb-getref-by-field "AU" author)
+  (refdb-getref-by-field "AX" author)
   (refdb-message-getting-refs-done 'author "=" author)
   )
 
@@ -2939,7 +2939,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
 		)
 	       )
   (refdb-message-getting-refs 'author "like" author)
-  (refdb-getref-by-field-regexp "AU" author)
+  (refdb-getref-by-field-regexp "AX" author)
   (refdb-message-getting-refs-done 'author "like" author)
   )
 
@@ -2947,7 +2947,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
   "Display all RefDB datasets matching TITLE."
   (interactive (list (read-string (format "Title: "))))
   (refdb-message-getting-refs 'title "=" title)
-  (refdb-getref-by-field "TI" title)
+  (refdb-getref-by-field "TX" title)
   (refdb-message-getting-refs-done 'title "=" title)
   )
 
@@ -2955,7 +2955,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
   "Display all RefDB datasets regexp-matching TITLE."
   (interactive (list (read-string (format "Title %s: " refdb-regexp-prompt))))
   (refdb-message-getting-refs 'title "like" title)
-  (refdb-getref-by-field-regexp "TI" title)
+  (refdb-getref-by-field-regexp "TX" title)
   (refdb-message-getting-refs-done 'title "like" title)
   )
 
@@ -3766,7 +3766,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
 		)
 	       )
   (refdb-message-getting-notes-by-link 'author "=" author)
-  (refdb-getnote-by-field "AU" author)
+  (refdb-getnote-by-field "AX" author)
   (refdb-message-getting-notes-by-link-done 'author "=" author)
   )
 
@@ -3779,7 +3779,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
 		)
 	       )
   (refdb-message-getting-notes-by-link 'author "like" author)
-  (refdb-getnote-by-field-regexp "AU" author)
+  (refdb-getnote-by-field-regexp "AX" author)
   (refdb-message-getting-notes-by-link-done 'author "like" author)
   )
 
@@ -3940,7 +3940,7 @@ You shouldn't call this function directly.  Instead call, e.g.,
   "Display all RefDB notes linked to authors matching REGION."
   (interactive)
   (refdb-message-getting-notes 'author "=" "REGION")
-  (refdb-getnote-by-field-on-region "AU")
+  (refdb-getnote-by-field-on-region "AX")
   (refdb-message-getting-notes-done 'author "=" "REGION")
   )
 
