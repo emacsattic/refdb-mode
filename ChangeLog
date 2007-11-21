@@ -1,3 +1,7 @@
+2007-11-21 00:06  mhoenicka
+
+	* [r565] ChangeLog, NEWS, configure.in: updated for 1.5
+
 2007-11-21 00:03  mhoenicka
 
 	* [r564] refdb-mode.el: use AX and TX to work with the 0.9.9 data
