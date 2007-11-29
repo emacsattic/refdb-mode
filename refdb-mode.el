@@ -1,6 +1,6 @@
 ;;; refdb-mode.el --- Minor mode for RefDB interaction
 
-;; Copyright (C) 2005-2006 Markus Hoenicka
+;; Copyright (C) 2005-2007 Markus Hoenicka
 
 ;; Authors: (-1.9)         Michael Smith <smith@sideshowbarker.net>
 ;;          (1.10-current) Markus Hoenicka <markus@mhoenicka.de>
@@ -433,9 +433,11 @@
 ;;   refdb-create-docbook-citation-on-region
 ;;   refdb-create-tei-citation-on-region
 ;;   refdb-create-muse-citation-on-region
+;;   refdb-create-plain-citation-on-region
 ;;   refdb-create-docbook-citation-from-point
 ;;   refdb-create-tei-citation-from-point
 ;;   refdb-create-muse-citation-from-point
+;;   refdb-create-plain-citation-from-point
 ;;   --
 ;;   refdb-addstyle-on-buffer
 ;;   refdb-liststyle
@@ -1731,6 +1733,13 @@ Note that CITATIONFORMAT is a symbol, not a string."
   "RefDB cite point as Muse menu item."
   )
 
+(defvar refdb-create-plain-citation-from-point-menu-item
+  ["Current as plain"
+   (refdb-create-plain-citation-from-point)
+   t]
+  "RefDB cite point as plain menu item."
+  )
+
 (defvar refdb-create-docbook-citation-on-region-menu-item
   ["In Region as DocBook"
    (refdb-create-docbook-citation-on-region)
@@ -1757,6 +1766,13 @@ Note that CITATIONFORMAT is a symbol, not a string."
    (refdb-create-muse-citation-on-region)
    t]
   "RefDB cite range as Muse menu item."
+  )
+
+(defvar refdb-create-plain-citation-on-region-menu-item
+  ["In Region as plain"
+   (refdb-create-plain-citation-on-region)
+   t]
+  "RefDB cite range as plain menu item."
   )
 
 (defvar refdb-addnote-menu-item
@@ -4456,6 +4472,8 @@ on the references within the current region in a getref buffer."
 	    (format "\\cite{%s}" my-id-string))
 	   ((eq type 'muse)
 	    (format "<cite>%s</cite>" my-id-string))
+	   ((eq type 'plain)
+	    (format "%s" my-id-string))
 	   )
        )
     )
@@ -4497,6 +4515,15 @@ Use the entire buffer if mark is not set."
   (message "Added citations in range to the kill ring as Muse")
   )
 
+(defun refdb-create-plain-citation-on-region ()
+  "Provide a plain citation in the kill ring based
+on the references within the current region in a getref buffer.
+Use the entire buffer if mark is not set."
+  (interactive)
+  (refdb-create-citation-on-region 'plain)
+  (message "Added citations in range to the kill ring as plain")
+  )
+
 (defun refdb-get-ris-idstring-from-region (type)
   "Scan the currently selected region for RIS ID elements and return their
 values as a list of strings. Use the entire buffer if mark is not set."
@@ -4519,7 +4546,8 @@ values as a list of strings. Use the entire buffer if mark is not set."
 	    (setq id-string (concat id-string "," (match-string 1 nil)))
 	  (if (or
 	       (eq refdb-citation-type 'short)
-	       (eq type 'muse))
+	       (eq type 'muse)
+	       (eq type 'plain))
 	      (setq id-string (concat id-string ";" (match-string 1 nil)))
 	    ;; the xref notation must be adapted to SGML and XML
 	    (setq id-string (concat id-string 
@@ -4538,7 +4566,8 @@ values as a list of strings. Use the entire buffer if mark is not set."
 	      (or
 	       (eq refdb-citation-type 'short)
 	       (eq type 'latex)
-	       (eq type 'muse))
+	       (eq type 'muse)
+	       (eq type 'plain))
 	      (not (string= id-string "")))
 	     (substring id-string 1))
 	    ((and
@@ -4589,7 +4618,8 @@ values as a list of strings."
 	    (setq id-string (concat id-string "," (match-string 1 nil)))
 	  (if (or
 	       (eq refdb-citation-type 'short)
-	       (eq type 'muse))
+	       (eq type 'muse)
+	       (eq type 'plain))
 	      (setq id-string (concat id-string ";" (match-string 1 nil)))
 	    ;; the xref notation must be adapted to SGML and XML
 	    (setq id-string (concat id-string 
@@ -4608,7 +4638,8 @@ values as a list of strings."
 	      (or
 	       (eq refdb-citation-type 'short)
 	       (eq type 'latex)
-	       (eq type 'muse))
+	       (eq type 'muse)
+	       (eq type 'plain))
 	      (not (string= id-string "")))
 	     (substring id-string 1))
 	    ((and
@@ -4659,6 +4690,8 @@ on the reference where point is currently located in a getref buffer."
 	    (format "\\cite{%s}" my-id))
 	   ((eq type 'muse)
 	    (format "<cite>%s</cite>" my-id))
+	   ((eq type 'plain)
+	    my-id)
 	   )
      )
     )
@@ -4696,6 +4729,14 @@ on the reference where point is currently located in a getref buffer."
   (message "Added citation from point to the kill ring as Muse")
   )
 
+(defun refdb-create-plain-citation-from-point ()
+  "Provide a plain citation in the kill ring based
+on the reference where point is currently located in a getref buffer."
+  (interactive)
+  (refdb-create-citation-from-point 'plain)
+  (message "Added citation from point to the kill ring as plain")
+  )
+
 (defun refdb-get-ris-id-from-point (type)
   "Search for the ID of the current reference in a RIS buffer."
   (save-excursion
@@ -4705,7 +4746,8 @@ on the reference where point is currently located in a getref buffer."
 	  (if (or
 	       (eq refdb-citation-type 'short)
 	       (eq type 'latex)
-	       (eq type 'muse))
+	       (eq type 'muse)
+	       (eq type 'plain))
 	      (match-string 1 nil)
 	    ;; the xref notation used here works for both SGML and XML
 	    (format
@@ -4726,7 +4768,9 @@ on the reference where point is currently located in a getref buffer."
       (if (re-search-forward "citekey=\"\\(.*\\)\"" eor t)
 	  (if (or
 	       (eq refdb-citation-type 'short)
-	       (eq type 'latex))
+	       (eq type 'latex)
+	       (eq type 'muse)
+	       (eq type 'plain))
 	      (match-string 1 nil)
 	    ;; the xref notation used here works for both SGML and XML
 	    (format
@@ -6531,10 +6575,12 @@ You shouldn't call this function directly.  Instead call, e.g.,
     ("\C-c\C-rcr" . refdb-create-tei-citation-on-region)
     ("\C-c\C-rcx" . refdb-create-latex-citation-on-region)
     ("\C-c\C-rcy" . refdb-create-muse-citation-on-region)
+    ("\C-c\C-rcn" . refdb-create-plain-citation-on-region)
     ("\C-c\C-rcd" . refdb-create-docbook-citation-from-point)
     ("\C-c\C-rct" . refdb-create-tei-citation-from-point)
     ("\C-c\C-rcl" . refdb-create-latex-citation-from-point)
     ("\C-c\C-rcm" . refdb-create-muse-citation-from-point)
+    ("\C-c\C-rcp" . refdb-create-plain-citation-from-point)
     ))
 
 (defvar refdb-menu-item-separator1
@@ -6998,11 +7044,13 @@ Customize this to add/remove/rearrange submenus."
     refdb-create-tei-citation-from-point-menu-item
     refdb-create-latex-citation-from-point-menu-item
     refdb-create-muse-citation-from-point-menu-item
+    refdb-create-plain-citation-from-point-menu-item
     refdb-menu-item-separator4
     refdb-create-docbook-citation-on-region-menu-item
     refdb-create-tei-citation-on-region-menu-item
     refdb-create-latex-citation-on-region-menu-item
     refdb-create-muse-citation-on-region-menu-item
+    refdb-create-plain-citation-on-region-menu-item
     )
   "*Contents of 'Cite References' submenu for RefDB mode.
 Customize this to add/remove/rearrange submenus."

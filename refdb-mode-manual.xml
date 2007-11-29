@@ -302,10 +302,12 @@
 		<para>cite as TEI from point: <keycap>t</keycap></para>
 		<para>cite as LaTeX from point: <keycap>l</keycap></para>
 		<para>cite as Muse from point: <keycap>m</keycap></para>
+		<para>cite as plain from point: <keycap>p</keycap></para>
 		<para>cite as DocBook (region): <keycap>s</keycap></para>
 		<para>cite as TEI (region): <keycap>t</keycap></para>
 		<para>cite as LaTeX (region): <keycap>x</keycap></para>
 		<para>cite as Muse (region): <keycap>y</keycap></para>
+		<para>cite as plain (region): <keycap>n</keycap></para>
 	      </entry>
 	    </row>
 	  </tbody>
