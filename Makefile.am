@@ -29,7 +29,7 @@ refdb-mode-config.el: FORCE
 	sed 's%<sysconfdir>%$(sysconfdir)%' > refdb-mode-config.el
 
 refdb-mode-manual.pdf: refdb-mode-manual.xml
-	xsltproc --param fop.extensions 1 --stringparam funcsynopsis.style ansi $(fosheet) refdb-mode-manual.xml > refdb-mode-manual.fo
+	xsltproc --stringparam fop1.extensions 1 --stringparam funcsynopsis.style ansi $(fosheet) refdb-mode-manual.xml > refdb-mode-manual.fo
 	fop -fo refdb-mode-manual.fo -pdf refdb-mode-manual.pdf
 
 refdb-mode-manual/*: refdb-mode-manual.xml
