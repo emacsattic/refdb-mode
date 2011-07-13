@@ -5007,7 +5007,7 @@ databases."
     (pop-to-buffer "*refdb-messages*")
     (pop-to-buffer "*refdb-output*")
     )
-  (with-current-buffer "*refdb-output"
+  (with-current-buffer "*refdb-output*"
     (refdb-output-mode))
   (setq resize-mini-windows resize-mini-windows-default)
   )
